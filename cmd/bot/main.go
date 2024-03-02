@@ -35,7 +35,7 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
-	routerHandler := routerPkg.NewRouter(bot)
+	routerHandler := routerPkg.NewRouter(bot) // Создаем обработчик телегрм бота
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT) // подписываем канал на сигналы завершения процесса

@@ -19,7 +19,7 @@ type Router struct {
 	bot *tgbotapi.BotAPI
 
 	// demoCommander
-	demoCommander Commander
+	demoCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
 	// user
 	// access
 	// buy
@@ -54,7 +54,7 @@ func NewRouter(
 		// bot
 		bot: bot,
 		// demoCommander
-		demoCommander: demo.NewDemoCommander(bot),
+		demoCommander: demo.NewDemoCommander(bot), // приведение структуры к интерфейсу
 		// user
 		// access
 		// buy
@@ -83,8 +83,9 @@ func NewRouter(
 	}
 }
 
+// HandleUpdate обработка сообщений телеграм бота
 func (c *Router) HandleUpdate(update tgbotapi.Update) {
-	defer func() {
+	defer func() { // рековер исключений, чтобы бот не умер
 		if panicValue := recover(); panicValue != nil {
 			log.Printf("recovered from panic: %v\n%v", panicValue, string(debug.Stack()))
 		}
@@ -92,12 +93,13 @@ func (c *Router) HandleUpdate(update tgbotapi.Update) {
 
 	switch {
 	case update.CallbackQuery != nil:
-		c.handleCallback(update.CallbackQuery)
+		c.handleCallback(update.CallbackQuery) // обработка кнопок
 	case update.Message != nil:
-		c.handleMessage(update.Message)
+		c.handleMessage(update.Message) // обработка сообщений
 	}
 }
 
+// handleCallback обработка нажатия кнопок
 func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	callbackPath, err := path.ParseCallback(callback.Data)
 	if err != nil {
@@ -163,6 +165,7 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	}
 }
 
+// handleMessage обработка команд
 func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	if !msg.IsCommand() {
 		c.showCommandFormat(msg)
@@ -234,6 +237,7 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	}
 }
 
+// showCommandFormat выдача в бот сообщения с форматом команд
 func (c *Router) showCommandFormat(inputMessage *tgbotapi.Message) {
 	outputMsg := tgbotapi.NewMessage(inputMessage.Chat.ID, "Command format: /{command}__{domain}__{subdomain}")
 

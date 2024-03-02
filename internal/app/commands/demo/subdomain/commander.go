@@ -13,6 +13,7 @@ type DemoSubdomainCommander struct {
 	subdomainService *subdomain.Service
 }
 
+// NewDemoSubdomainCommander конструктор
 func NewDemoSubdomainCommander(
 	bot *tgbotapi.BotAPI,
 ) *DemoSubdomainCommander {
@@ -24,6 +25,7 @@ func NewDemoSubdomainCommander(
 	}
 }
 
+// HandleCallback перебор кнопок и вызов соттветствующего обработчика
 func (c *DemoSubdomainCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 	switch callbackPath.CallbackName {
 	case "list":
@@ -33,6 +35,7 @@ func (c *DemoSubdomainCommander) HandleCallback(callback *tgbotapi.CallbackQuery
 	}
 }
 
+// HandleCommand перебор команд и вызов соттветствующего обработчика
 func (c *DemoSubdomainCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
 	switch commandPath.CommandName {
 	case "help":
