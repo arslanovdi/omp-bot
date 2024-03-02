@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/ozonmp/omp-bot/internal/app/path"
+	"github.com/arslanovdi/omp-bot/internal/app/path"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type CallbackListData struct {

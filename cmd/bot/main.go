@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	routerPkg "github.com/arslanovdi/omp-bot/internal/app/router"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	routerPkg "github.com/ozonmp/omp-bot/internal/app/router"
 )
 
 func main() {
@@ -31,10 +31,10 @@ func main() {
 		Timeout: 60,
 	}
 
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
+	updates := bot.GetUpdatesChan(u)
+	/*if err != nil {
 		log.Panic(err)
-	}
+	}*/
 
 	routerHandler := routerPkg.NewRouter(bot)
 
