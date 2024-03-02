@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	routerPkg "github.com/arslanovdi/omp-bot/internal/app/router"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -32,13 +34,23 @@ func main() {
 	}
 
 	updates := bot.GetUpdatesChan(u)
-	/*if err != nil {
-		log.Panic(err)
-	}*/
 
 	routerHandler := routerPkg.NewRouter(bot)
 
-	for update := range updates {
-		routerHandler.HandleUpdate(update)
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT) // подписываем канал на сигналы завершения процесса
+
+	for {
+		select {
+		case update := <-updates:
+			routerHandler.HandleUpdate(update)
+		case <-stop:
+			log.Println("Graceful shutdown")
+			return
+		}
 	}
+
+	/*for update := range updates {
+		routerHandler.HandleUpdate(update)
+	}*/
 }
