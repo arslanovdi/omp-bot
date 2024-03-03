@@ -25,6 +25,7 @@ func (c *clientCommander) List(message *tgbotapi.Message) {
 		} else {
 			c.errorResponseCommand(message, fmt.Sprintf("Ошибка получения списка"))
 			log.Printf("Ошибка получения списка: %v", err)
+			return
 		}
 	}
 

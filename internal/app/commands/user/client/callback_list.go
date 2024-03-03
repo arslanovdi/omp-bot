@@ -42,6 +42,7 @@ func (c *clientCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbac
 		} else {
 			c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
 			log.Printf("Ошибка получения списка: %v", err)
+			return
 		}
 	}
 
