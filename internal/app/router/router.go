@@ -4,7 +4,7 @@ import (
 	"log"
 	"runtime/debug"
 
-	"github.com/arslanovdi/omp-bot/internal/app/commands/demo"
+	"github.com/arslanovdi/omp-bot/internal/app/commands/user"
 	"github.com/arslanovdi/omp-bot/internal/app/path"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -19,7 +19,7 @@ type Router struct {
 	bot *tgbotapi.BotAPI
 
 	// demoCommander
-	demoCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
+	userCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
 	// user
 	// access
 	// buy
@@ -54,7 +54,8 @@ func NewRouter(
 		// bot
 		bot: bot,
 		// demoCommander
-		demoCommander: demo.NewDemoCommander(bot), // приведение структуры к интерфейсу
+		userCommander: user.NewUserCommander(bot),
+		//demo.NewDemoCommander(bot), // приведение структуры к интерфейсу
 		// user
 		// access
 		// buy
@@ -109,9 +110,9 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 
 	switch callbackPath.Domain {
 	case "demo":
-		c.demoCommander.HandleCallback(callback, callbackPath)
+		break //c.demoCommander.HandleCallback(callback, callbackPath)
 	case "user":
-		break
+		c.userCommander.HandleCallback(callback, callbackPath)
 	case "access":
 		break
 	case "buy":
@@ -181,9 +182,9 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 
 	switch commandPath.Domain {
 	case "demo":
-		c.demoCommander.HandleCommand(msg, commandPath)
+		break //c.demoCommander.HandleCommand(msg, commandPath)
 	case "user":
-		break
+		c.userCommander.HandleCommand(msg, commandPath)
 	case "access":
 		break
 	case "buy":
