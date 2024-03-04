@@ -1,14 +1,14 @@
-package client
+package _package
 
 import (
 	"fmt"
-	"github.com/arslanovdi/omp-bot/internal/model/user"
+	"github.com/arslanovdi/omp-bot/internal/model/logistic"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 )
 
 // Edit обработка команды /edit бота
-func (c *clientCommander) Edit(message *tgbotapi.Message) {
+func (c *packageCommander) Edit(message *tgbotapi.Message) {
 	args := message.CommandArguments()
 	id := uint64(0)
 	name := ""
@@ -19,20 +19,20 @@ func (c *clientCommander) Edit(message *tgbotapi.Message) {
 		return
 	}
 
-	err = c.clientService.Update(id, user.Client{Name: name})
+	err = c.packageService.Update(id, logistic.Package{Name: name})
 	if err != nil {
-		c.errorResponseCommand(message, fmt.Sprintf("Fail to edit client with id %d", id))
-		log.Printf("fail to edit client with id %d: %v", id, err)
+		c.errorResponseCommand(message, fmt.Sprintf("Fail to edit package with id %d", id))
+		log.Printf("fail to edit package with id %d: %v", id, err)
 		return
 	}
 
 	msg := tgbotapi.NewMessage(
 		message.Chat.ID,
-		fmt.Sprintf("client id: %d renamed to %s", id, name),
+		fmt.Sprintf("package id: %d renamed to %s", id, name),
 	)
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("ClientCommander.New: error sending reply message to chat - %v", err)
+		log.Printf("PackageCommander.New: error sending reply message to chat - %v", err)
 	}
 }

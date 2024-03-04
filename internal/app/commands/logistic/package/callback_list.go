@@ -1,10 +1,10 @@
-package client
+package _package
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/arslanovdi/omp-bot/internal/model/user"
+	"github.com/arslanovdi/omp-bot/internal/model/logistic"
 	"log"
 	"strings"
 
@@ -17,27 +17,27 @@ type CallbackListData struct {
 }
 
 // CallbackList обработка реакции на нажатие кнопки
-func (c *clientCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 
 	parsedData := CallbackListData{}
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &parsedData)
 	if err != nil {
 		c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
-		log.Printf("clientCommander.CallbackList: "+
+		log.Printf("packageCommander.CallbackList: "+
 			"error reading json data for type CallbackListData from "+
 			"input string %v - %v", callbackPath.CallbackData, err)
 		return
 	}
 
 	outputMsgText := strings.Builder{}
-	outputMsgText.WriteString("These are our clients: \n\n")
+	outputMsgText.WriteString("These are our packages: \n\n")
 
-	clients, err := c.clientService.List(uint64(parsedData.Offset)+limit, limit) // Запрашиваем клиентов со смещением
+	packages, err := c.packageService.List(uint64(parsedData.Offset)+limit, limit) // Запрашиваем клиентов со смещением
 
 	var endOfList bool
 
 	if err != nil {
-		if errors.Is(err, user.EndOfList) {
+		if errors.Is(err, logistic.EndOfList) {
 			endOfList = true
 		} else {
 			c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
@@ -46,7 +46,7 @@ func (c *clientCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbac
 		}
 	}
 
-	for _, p := range clients {
+	for _, p := range packages {
 		outputMsgText.WriteString(p.Name)
 		outputMsgText.WriteString("\n")
 	}
@@ -68,6 +68,6 @@ func (c *clientCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbac
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("ClientCommander.CallbackList: error sending reply message to chat - %v", err)
+		log.Printf("PackageCommander.CallbackList: error sending reply message to chat - %v", err)
 	}
 }

@@ -1,4 +1,4 @@
-package client
+package _package
 
 import (
 	"log"
@@ -7,13 +7,13 @@ import (
 )
 
 // Default ответ при неверной команде
-func (c *clientCommander) Default(message *tgbotapi.Message) {
+func (c *packageCommander) Default(message *tgbotapi.Message) {
 	log.Printf("[%s] %s", message.From.UserName, message.Text)
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, "You wrote: "+message.Text)
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("ClientCommander.Help: error sending reply message to chat - %v", err)
+		log.Printf("PackageCommander.Help: error sending reply message to chat - %v", err)
 	}
 }

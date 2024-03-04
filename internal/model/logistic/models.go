@@ -1,13 +1,13 @@
-package user
+package logistic
 
 import "errors"
 
 var EndOfList = errors.New("end of list")
 
-type Client struct {
+type Package struct {
 	Name string
 }
 
-func (c *Client) String() string {
+func (c *Package) String() string {
 	return c.Name
 }

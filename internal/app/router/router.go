@@ -1,10 +1,10 @@
 package router
 
 import (
+	"github.com/arslanovdi/omp-bot/internal/app/commands/logistic"
 	"log"
 	"runtime/debug"
 
-	"github.com/arslanovdi/omp-bot/internal/app/commands/user"
 	"github.com/arslanovdi/omp-bot/internal/app/path"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -19,7 +19,6 @@ type Router struct {
 	bot *tgbotapi.BotAPI
 
 	// demoCommander
-	userCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
 	// user
 	// access
 	// buy
@@ -43,6 +42,7 @@ type Router struct {
 	// security
 	// cinema
 	// logistic
+	logisticCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
 	// product
 	// education
 }
@@ -54,7 +54,6 @@ func NewRouter(
 		// bot
 		bot: bot,
 		// demoCommander
-		userCommander: user.NewUserCommander(bot),
 		//demo.NewDemoCommander(bot), // приведение структуры к интерфейсу
 		// user
 		// access
@@ -79,6 +78,7 @@ func NewRouter(
 		// security
 		// cinema
 		// logistic
+		logisticCommander: logistic.NewLogisticCommander(bot),
 		// product
 		// education
 	}
@@ -112,7 +112,7 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	case "demo":
 		break //c.demoCommander.HandleCallback(callback, callbackPath)
 	case "user":
-		c.userCommander.HandleCallback(callback, callbackPath)
+		break
 	case "access":
 		break
 	case "buy":
@@ -156,7 +156,7 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	case "cinema":
 		break
 	case "logistic":
-		break
+		c.logisticCommander.HandleCallback(callback, callbackPath)
 	case "product":
 		break
 	case "education":
@@ -184,7 +184,7 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	case "demo":
 		break //c.demoCommander.HandleCommand(msg, commandPath)
 	case "user":
-		c.userCommander.HandleCommand(msg, commandPath)
+		break
 	case "access":
 		break
 	case "buy":
@@ -228,7 +228,7 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	case "cinema":
 		break
 	case "logistic":
-		break
+		c.logisticCommander.HandleCommand(msg, commandPath)
 	case "product":
 		break
 	case "education":

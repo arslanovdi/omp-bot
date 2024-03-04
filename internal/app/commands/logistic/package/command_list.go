@@ -1,10 +1,10 @@
-package client
+package _package
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/arslanovdi/omp-bot/internal/model/user"
+	"github.com/arslanovdi/omp-bot/internal/model/logistic"
 	"log"
 	"strings"
 
@@ -12,15 +12,15 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func (c *clientCommander) List(message *tgbotapi.Message) {
+func (c *packageCommander) List(message *tgbotapi.Message) {
 	outputMsgText := strings.Builder{}
-	outputMsgText.WriteString("These are all our clients: \n\n")
+	outputMsgText.WriteString("These are all our packages: \n\n")
 
-	clients, err := c.clientService.List(1, limit)
+	packages, err := c.packageService.List(1, limit)
 	var endOfList bool
 
 	if err != nil {
-		if errors.Is(err, user.EndOfList) {
+		if errors.Is(err, logistic.EndOfList) {
 			endOfList = true
 		} else {
 			c.errorResponseCommand(message, fmt.Sprintf("Ошибка получения списка"))
@@ -29,7 +29,7 @@ func (c *clientCommander) List(message *tgbotapi.Message) {
 		}
 	}
 
-	for _, p := range clients {
+	for _, p := range packages {
 		outputMsgText.WriteString(p.Name)
 		outputMsgText.WriteString("\n")
 	}
@@ -42,8 +42,8 @@ func (c *clientCommander) List(message *tgbotapi.Message) {
 		})
 
 		callbackPath := path.CallbackPath{ // собираем структуру кнопки
-			Domain:       "user",
-			Subdomain:    "client",
+			Domain:       "logistic",
+			Subdomain:    "package",
 			CallbackName: "list",
 			CallbackData: string(serializedData),
 		}
@@ -57,6 +57,6 @@ func (c *clientCommander) List(message *tgbotapi.Message) {
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("ClientCommander.List: error sending reply message to chat - %v", err)
+		log.Printf("PackageCommander.List: error sending reply message to chat - %v", err)
 	}
 }

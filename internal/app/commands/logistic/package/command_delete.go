@@ -1,4 +1,4 @@
-package client
+package _package
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func (c *clientCommander) Delete(message *tgbotapi.Message) {
+func (c *packageCommander) Delete(message *tgbotapi.Message) {
 	args := message.CommandArguments()
 
 	id, err := strconv.Atoi(args)
@@ -18,10 +18,10 @@ func (c *clientCommander) Delete(message *tgbotapi.Message) {
 		return
 	}
 
-	ok, err := c.clientService.Remove(uint64(id))
+	ok, err := c.packageService.Remove(uint64(id))
 	if err != nil {
-		c.errorResponseCommand(message, fmt.Sprintf("Fail to delete client with id %d", id))
-		log.Printf("fail to delete client with id %d: %v", id, err)
+		c.errorResponseCommand(message, fmt.Sprintf("Fail to delete package with id %d", id))
+		log.Printf("fail to delete package with id %d: %v", id, err)
 		return
 	}
 
@@ -29,17 +29,17 @@ func (c *clientCommander) Delete(message *tgbotapi.Message) {
 	if ok {
 		msg = tgbotapi.NewMessage(
 			message.Chat.ID,
-			fmt.Sprintf("Client with id: %d deleted", id),
+			fmt.Sprintf("Package with id: %d deleted", id),
 		)
 	} else {
 		msg = tgbotapi.NewMessage(
 			message.Chat.ID,
-			fmt.Sprintf("Client with id: %d NOT deleted", id),
+			fmt.Sprintf("Package with id: %d NOT deleted", id),
 		)
 	}
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("ClientCommander.Delete: error sending reply message to chat - %v", err)
+		log.Printf("PackageCommander.Delete: error sending reply message to chat - %v", err)
 	}
 }
