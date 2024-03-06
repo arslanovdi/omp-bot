@@ -19,7 +19,7 @@ func (c *packageCommander) Edit(message *tgbotapi.Message) {
 		return
 	}
 
-	err = c.packageService.Update(id, logistic.Package{Name: name})
+	err = c.packageService.Update(id, logistic.Package{Title: name})
 	if err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("Fail to edit package with id %d", id))
 		log.Printf("fail to edit package with id %d: %v", id, err)

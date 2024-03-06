@@ -47,7 +47,7 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 	}
 
 	for _, p := range packages {
-		outputMsgText.WriteString(p.Name)
+		outputMsgText.WriteString(p.Title)
 		outputMsgText.WriteString("\n")
 	}
 

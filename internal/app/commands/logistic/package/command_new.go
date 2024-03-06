@@ -17,7 +17,7 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 		return
 	}
 
-	id, err := c.packageService.Create(logistic.Package{Name: name})
+	id, err := c.packageService.Create(logistic.Package{Title: name})
 
 	if err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("Fail to create package with name %v", name))
