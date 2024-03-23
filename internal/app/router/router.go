@@ -2,7 +2,8 @@ package router
 
 import (
 	"github.com/arslanovdi/omp-bot/internal/app/commands/logistic"
-	"log"
+	"github.com/arslanovdi/omp-bot/internal/service"
+	"log/slog"
 	"runtime/debug"
 
 	"github.com/arslanovdi/omp-bot/internal/app/path"
@@ -15,80 +16,29 @@ type Commander interface {
 }
 
 type Router struct {
-	// bot
-	bot *tgbotapi.BotAPI
-
-	// demoCommander
-	// user
-	// access
-	// buy
-	// delivery
-	// recommendation
-	// travel
-	// loyalty
-	// bank
-	// subscription
-	// license
-	// insurance
-	// payment
-	// storage
-	// streaming
-	// business
-	// work
-	// service
-	// exchange
-	// estate
-	// rating
-	// security
-	// cinema
-	// logistic
+	bot               *tgbotapi.BotAPI
 	logisticCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
-	// product
-	// education
+
 }
 
 func NewRouter(
 	bot *tgbotapi.BotAPI,
+	pkgService *service.LogisticPackageService,
 ) *Router {
 	return &Router{
-		// bot
-		bot: bot,
-		// demoCommander
-		//demo.NewDemoCommander(bot), // приведение структуры к интерфейсу
-		// user
-		// access
-		// buy
-		// delivery
-		// recommendation
-		// travel
-		// loyalty
-		// bank
-		// subscription
-		// license
-		// insurance
-		// payment
-		// storage
-		// streaming
-		// business
-		// work
-		// service
-		// exchange
-		// estate
-		// rating
-		// security
-		// cinema
-		// logistic
-		logisticCommander: logistic.NewLogisticCommander(bot),
-		// product
-		// education
+		bot:               bot,
+		logisticCommander: logistic.NewLogisticCommander(bot, pkgService),
 	}
 }
 
 // HandleUpdate обработка сообщений телеграм бота
 func (c *Router) HandleUpdate(update tgbotapi.Update) {
+
+	log := slog.With("func", "Router.HandleUpdate")
+
 	defer func() { // рековер исключений, чтобы бот не умер
 		if panicValue := recover(); panicValue != nil {
-			log.Printf("recovered from panic: %v\n%v", panicValue, string(debug.Stack()))
+			log.Warn("recovered from panic", slog.Any("panic value", panicValue), slog.String("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -102,148 +52,56 @@ func (c *Router) HandleUpdate(update tgbotapi.Update) {
 
 // handleCallback обработка нажатия кнопок
 func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
+
+	log := slog.With("func", "Router.handleCallback")
+
 	callbackPath, err := path.ParseCallback(callback.Data)
 	if err != nil {
-		log.Printf("Router.handleCallback: error parsing callback data `%s` - %v", callback.Data, err)
+		log.Info("error parsing callback data", slog.String("data", callback.Data), slog.Any("error", err))
 		return
 	}
 
 	switch callbackPath.Domain {
-	case "demo":
-		break //c.demoCommander.HandleCallback(callback, callbackPath)
-	case "user":
-		break
-	case "access":
-		break
-	case "buy":
-		break
-	case "delivery":
-		break
-	case "recommendation":
-		break
-	case "travel":
-		break
-	case "loyalty":
-		break
-	case "bank":
-		break
-	case "subscription":
-		break
-	case "license":
-		break
-	case "insurance":
-		break
-	case "payment":
-		break
-	case "storage":
-		break
-	case "streaming":
-		break
-	case "business":
-		break
-	case "work":
-		break
-	case "service":
-		break
-	case "exchange":
-		break
-	case "estate":
-		break
-	case "rating":
-		break
-	case "security":
-		break
-	case "cinema":
-		break
 	case "logistic":
 		c.logisticCommander.HandleCallback(callback, callbackPath)
-	case "product":
-		break
-	case "education":
-		break
 	default:
-		log.Printf("Router.handleCallback: unknown domain - %s", callbackPath.Domain)
+		log.Info("unknown domain", slog.String("domain", callbackPath.Domain))
 	}
 }
 
 // handleMessage обработка команд
 func (c *Router) handleMessage(msg *tgbotapi.Message) {
+
+	log := slog.With("func", "Router.handleMessage")
+
 	if !msg.IsCommand() {
 		c.showCommandFormat(msg)
-
 		return
 	}
 
 	commandPath, err := path.ParseCommand(msg.Command())
 	if err != nil {
-		log.Printf("Router.handleCallback: error parsing callback data `%s` - %v", msg.Command(), err)
+		log.Error("error parsing command", slog.String("command", msg.Command()), slog.Any("error", err))
 		return
 	}
 
 	switch commandPath.Domain {
-	case "demo":
-		break //c.demoCommander.HandleCommand(msg, commandPath)
-	case "user":
-		break
-	case "access":
-		break
-	case "buy":
-		break
-	case "delivery":
-		break
-	case "recommendation":
-		break
-	case "travel":
-		break
-	case "loyalty":
-		break
-	case "bank":
-		break
-	case "subscription":
-		break
-	case "license":
-		break
-	case "insurance":
-		break
-	case "payment":
-		break
-	case "storage":
-		break
-	case "streaming":
-		break
-	case "business":
-		break
-	case "work":
-		break
-	case "service":
-		break
-	case "exchange":
-		break
-	case "estate":
-		break
-	case "rating":
-		break
-	case "security":
-		break
-	case "cinema":
-		break
 	case "logistic":
 		c.logisticCommander.HandleCommand(msg, commandPath)
-	case "product":
-		break
-	case "education":
-		break
 	default:
-		log.Printf("Router.handleCallback: unknown domain - %s", commandPath.Domain)
+		log.Info("unknown domain", slog.String("domain", commandPath.Domain))
 	}
 }
 
 // showCommandFormat выдача в бот сообщения с форматом команд
 func (c *Router) showCommandFormat(inputMessage *tgbotapi.Message) {
+
+	log := slog.With("func", "Router.showCommandFormat")
+
 	outputMsg := tgbotapi.NewMessage(inputMessage.Chat.ID, "Command format: /{command}__{domain}__{subdomain}")
 
 	_, err := c.bot.Send(outputMsg)
 	if err != nil {
-		log.Printf("Router.showCommandFormat: error sending reply message to chat - %v", err)
+		log.Error("error sending reply message to chat", slog.Any("error", err))
 	}
 }

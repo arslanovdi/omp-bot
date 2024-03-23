@@ -2,26 +2,34 @@ package _package
 
 import (
 	"fmt"
-	"github.com/arslanovdi/omp-bot/internal/model/logistic"
+	"github.com/arslanovdi/omp-bot/internal/model"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
+	"log/slog"
+	"time"
 )
 
 // New обработка команды /new бота
 func (c *packageCommander) New(message *tgbotapi.Message) {
+
+	log := slog.With("func", "packageCommander.New")
+
 	name := message.CommandArguments()
 
 	if len(name) == 0 {
 		c.errorResponseCommand(message, fmt.Sprintf("wrong args"))
-		log.Printf("fail to create package with name %v", name)
+		log.Info("fail to create package", slog.String("name", name))
 		return
 	}
 
-	id, err := c.packageService.Create(logistic.Package{Title: name})
+	id, err := c.packageService.Create(model.Package{
+		Title:     name,
+		Weight:    0, // TODO добавить вес в параметры команд телеграма
+		CreatedAt: time.Now(),
+	})
 
 	if err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("Fail to create package with name %v", name))
-		log.Printf("fail to create package with name %v: %v", name, err)
+		log.Error("fail to create package", slog.String("name", name), slog.Any("error", err))
 		return
 	}
 
@@ -32,6 +40,6 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("PackageCommander.New: error sending reply message to chat - %v", err)
+		log.Error("error sending reply message to chat", slog.Any("error", err))
 	}
 }

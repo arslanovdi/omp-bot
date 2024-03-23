@@ -1,50 +1,71 @@
 package main
 
 import (
+	"context"
+	"errors"
+	routerPkg "github.com/arslanovdi/omp-bot/internal/app/router"
+	"github.com/arslanovdi/omp-bot/internal/config"
+	"github.com/arslanovdi/omp-bot/internal/grpc"
 	"github.com/arslanovdi/omp-bot/internal/logger"
-	"log"
+	"github.com/arslanovdi/omp-bot/internal/service"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
-
-	routerPkg "github.com/arslanovdi/omp-bot/internal/app/router"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/joho/godotenv"
+	"time"
 )
 
 const level = slog.LevelDebug // log level
 
 func main() {
 	logger.InitializeLogger(level) // slog logger
+	log := slog.With("func", "main")
+
+	startCtx, cancel := context.WithTimeout(context.Background(), time.Minute) // контекст запуска приложения
+	defer cancel()
+	go func() {
+		<-startCtx.Done()
+		if errors.Is(startCtx.Err(), context.DeadlineExceeded) { // приложение зависло при запуске
+			log.Warn("Application startup time exceeded")
+			os.Exit(1)
+		}
+	}()
+
+	config.ReadConfigYML("config.yml")
 
 	_ = godotenv.Load()
 
 	token, found := os.LookupEnv("TOKEN")
 	if !found {
-		slog.Warn("environment variable TOKEN not found in .env")
+		log.Warn("environment variable TOKEN not found in .env")
 		os.Exit(1)
 	}
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		slog.Warn("Failed to create new bot", err)
+		log.Warn("Failed to create new bot", slog.Any("error", err))
 		os.Exit(1)
 	}
 
 	// Uncomment if you want debugging
 	// bot.Debug = true
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	grpcClient := grpc.NewGrpcClient()
+	packageService := service.NewPackageService(grpcClient)
+
+	log.Info("Telegram bot authorized on account ", slog.String("account", bot.Self.UserName))
 
 	u := tgbotapi.UpdateConfig{
 		Timeout: 60,
 	}
 
-	updates := bot.GetUpdatesChan(u)
+	updates := bot.GetUpdatesChan(u) // получаем канал обновлений телеграм бота
 
-	routerHandler := routerPkg.NewRouter(bot) // Создаем обработчик телегрм бота
+	routerHandler := routerPkg.NewRouter(bot, packageService) // Создаем обработчик телегрм бота
 
+	cancel() // отменяем контекст запуска приложения
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT) // подписываем канал на сигналы завершения процесса
 	for {
@@ -53,6 +74,7 @@ func main() {
 			routerHandler.HandleUpdate(update)
 		case <-stop:
 			slog.Info("Graceful shutdown")
+			grpcClient.Close()
 			return
 		}
 	}

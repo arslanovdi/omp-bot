@@ -2,18 +2,18 @@ package _package
 
 import (
 	"github.com/arslanovdi/omp-bot/internal/app/path"
-	"github.com/arslanovdi/omp-bot/internal/model/logistic"
+	"github.com/arslanovdi/omp-bot/internal/model"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
+	"log/slog"
 )
 
+// PackageService интерфейс слоя бизнес-логики
 type PackageService interface {
-	Describe(PackageID uint64) (*logistic.Package, error)
-	List(cursor uint64, limit uint64) ([]logistic.Package, error)
-	Get(cursor uint64) (logistic.Package, error)
-	Create(logistic.Package) (uint64, error)
-	Update(packageID uint64, pkg logistic.Package) error
-	Remove(packageID uint64) (bool, error)
+	Create(model.Package) (uint64, error)
+	Delete(packageID uint64) (bool, error)
+	Get(cursor uint64) (model.Package, error)
+	List(cursor uint64, limit uint64) ([]model.Package, error)
+	Update(packageID uint64, pkg model.Package) error
 }
 
 const limit = 10 // кол-во package выдаваемое за 1 раз
@@ -33,11 +33,14 @@ func NewPackageCommander(bot *tgbotapi.BotAPI, service PackageService) *packageC
 
 // HandleCallback перебор кнопок и вызов соттветствующего обработчика
 func (c *packageCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+
+	log := slog.With("func", "PackageCommander.HandleCallback")
+
 	switch callbackPath.CallbackName {
 	case "list":
 		c.CallbackList(callback, callbackPath)
 	default:
-		log.Printf("PackageCommander.HandleCallback: unknown callback name: %s", callbackPath.CallbackName)
+		log.Info("unknown callback name", slog.String("callback name", callbackPath.CallbackName))
 	}
 }
 
@@ -63,6 +66,9 @@ func (c *packageCommander) HandleCommand(msg *tgbotapi.Message, commandPath path
 
 // errorResponseCommand возвращает сообщение об ошибке в бот
 func (c *packageCommander) errorResponseCommand(message *tgbotapi.Message, resp string) {
+
+	log := slog.With("func", "PackageCommander.errorResponseCommand")
+
 	msg := tgbotapi.NewMessage(
 		message.Chat.ID,
 		resp,
@@ -70,18 +76,21 @@ func (c *packageCommander) errorResponseCommand(message *tgbotapi.Message, resp 
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("PackageCommander.errorResponseCommand: error sending reply message to chat - %v", err)
+		log.Error("error sending reply message to chat", slog.Any("error", err))
 	}
 }
 
 // errorResponseCallback возвращает сообщение об ошибке в бот
 func (c *packageCommander) errorResponseCallback(callback *tgbotapi.CallbackQuery, resp string) {
+
+	log := slog.With("func", "PackageCommander.errorResponseCallback")
+
 	msg := tgbotapi.NewMessage(
 		callback.Message.Chat.ID,
 		resp,
 	)
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("PackageCommander.errorResponseCallback: error sending reply message to chat - %v", err)
+		log.Error("error sending reply message to chat", slog.Any("error", err))
 	}
 }

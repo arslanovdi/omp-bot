@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/arslanovdi/omp-bot/internal/model/logistic"
-	"log"
+	"github.com/arslanovdi/omp-bot/internal/model"
+	"log/slog"
 	"strings"
 
 	"github.com/arslanovdi/omp-bot/internal/app/path"
@@ -19,13 +19,15 @@ type CallbackListData struct {
 // CallbackList обработка реакции на нажатие кнопки
 func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 
+	log := slog.With("func", "packageCommander.CallbackList")
+
 	parsedData := CallbackListData{}
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &parsedData)
 	if err != nil {
 		c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
-		log.Printf("packageCommander.CallbackList: "+
-			"error reading json data for type CallbackListData from "+
-			"input string %v - %v", callbackPath.CallbackData, err)
+		log.Error("fail to read json data for type CallbackListData from input string",
+			slog.String("input string", callbackPath.CallbackData),
+			slog.Any("error", err))
 		return
 	}
 
@@ -37,11 +39,11 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 	var endOfList bool
 
 	if err != nil {
-		if errors.Is(err, logistic.EndOfList) {
+		if errors.Is(err, model.EndOfList) {
 			endOfList = true
 		} else {
 			c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
-			log.Printf("Ошибка получения списка: %v", err)
+			log.Error("fail to get list of packages", slog.Any("error", err))
 			return
 		}
 	}
@@ -68,6 +70,6 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("PackageCommander.CallbackList: error sending reply message to chat - %v", err)
+		log.Error("error sending reply message to chat", slog.Any("error", err))
 	}
 }

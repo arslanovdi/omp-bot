@@ -2,11 +2,14 @@ package _package
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
+	"log/slog"
 	"strings"
 )
 
 func (c *packageCommander) Help(message *tgbotapi.Message) {
+
+	log := slog.With("func", "packageCommander.Help")
+
 	str := strings.Builder{}
 	str.WriteString("/help__logistic__package - help\n")
 	str.WriteString("/get__logistic__package - get package (id)\n")
@@ -21,6 +24,6 @@ func (c *packageCommander) Help(message *tgbotapi.Message) {
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("PackageCommander.Help: error sending reply message to chat - %v", err)
+		log.Error("error sending reply message to chat", slog.Any("error", err))
 	}
 }

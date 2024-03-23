@@ -2,8 +2,8 @@ package logistic
 
 import (
 	"github.com/arslanovdi/omp-bot/internal/app/commands/logistic/package"
-	service "github.com/arslanovdi/omp-bot/internal/service/logistic/package"
-	"log"
+	"github.com/arslanovdi/omp-bot/internal/service"
+	"log/slog"
 
 	"github.com/arslanovdi/omp-bot/internal/app/path"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -26,31 +26,33 @@ type logisticCommander struct {
 }
 
 // NewLogisticCommander конструктор
-func NewLogisticCommander(
-	bot *tgbotapi.BotAPI,
-) *logisticCommander {
-
+func NewLogisticCommander(bot *tgbotapi.BotAPI, pkgService *service.LogisticPackageService) *logisticCommander {
 	return &logisticCommander{
-		bot: bot,
-		// subdomainCommander
-		packageCommander: _package.NewPackageCommander(bot, service.NewPackageService()),
+		bot:              bot,
+		packageCommander: _package.NewPackageCommander(bot, pkgService),
 	}
 }
 
 func (c *logisticCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+
+	log := slog.With("func", "logisticCommander.HandleCallback")
+
 	switch callbackPath.Subdomain {
 	case "package":
 		c.packageCommander.HandleCallback(callback, callbackPath)
 	default:
-		log.Printf("LogisticCommander.HandleCallback: unknown subdomain - %s", callbackPath.Subdomain)
+		log.Info("unknown subdomain", slog.String("subdomain", callbackPath.Subdomain))
 	}
 }
 
 func (c *logisticCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
+
+	log := slog.With("func", "logisticCommander.HandleCommand")
+
 	switch commandPath.Subdomain {
 	case "package":
 		c.packageCommander.HandleCommand(msg, commandPath)
 	default:
-		log.Printf("LogisticCommander.HandleCommand: unknown subdomain - %s", commandPath.Subdomain)
+		log.Info("unknown subdomain", slog.String("subdomain", commandPath.Subdomain))
 	}
 }
