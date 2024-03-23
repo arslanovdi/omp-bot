@@ -2,19 +2,20 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/arslanovdi/omp-bot/internal/model"
 )
 
-// Update изменяем пакет
-func (c *LogisticPackageService) Update(cursor uint64, pkg model.Package) error {
+// Update изменяем существующий пакет
+func (c *LogisticPackageService) Update(cursor uint64, pkg model.Package) (bool, error) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.ctxTimeout)
 	defer cancel()
 
-	err := c.api.UpdatePackage(ctx, cursor, pkg)
+	ok, err := c.api.UpdatePackage(ctx, cursor, pkg)
 	if err != nil {
-		return err
+		return false, fmt.Errorf("service.Update: %w", err)
 	}
 
-	return nil
+	return ok, nil
 }

@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/arslanovdi/omp-bot/internal/config"
 	"github.com/arslanovdi/omp-bot/internal/model"
 	"google.golang.org/grpc"
@@ -12,87 +13,66 @@ import (
 
 import pb "github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api"
 
-type grpsClient struct {
-	Send pb.LogisticPackageApiServiceClient
-	Conn *grpc.ClientConn
+type grpcClient struct {
+	send pb.LogisticPackageApiServiceClient
+	conn *grpc.ClientConn
 }
 
 // CreatePackage вызывает gRPC функцию CreatePackageV1
-func (client *grpsClient) CreatePackage(ctx context.Context, pkg model.Package) (*uint64, error) {
+func (client *grpcClient) CreatePackage(ctx context.Context, pkg model.Package) (*uint64, error) {
 
-	log := slog.With("func", "grpsClient.CreatePackageV1")
-
-	response, err := client.Send.CreatePackageV1(
+	response, err := client.send.CreatePackageV1(
 		ctx,
 		&pb.CreatePackageRequestV1{
 			Value: pkg.ToProto(),
 		})
 
 	if err != nil {
-		log.Error("Create package failed:", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("grpc.CreatePackage: %w", err)
 	}
-
-	log.Debug("Package created", slog.Uint64("id", response.PackageId))
 
 	return &response.PackageId, nil
 }
 
 // DeletePackage вызывает gRPC функцию DeletePackageV1
-func (client *grpsClient) DeletePackage(ctx context.Context, id uint64) error {
+func (client *grpcClient) DeletePackage(ctx context.Context, id uint64) (bool, error) {
 
-	log := slog.With("func", "grpsClient.DeletePackageV1")
-
-	response, err := client.Send.DeletePackageV1(
+	response, err := client.send.DeletePackageV1(
 		ctx,
 		&pb.DeletePackageV1Request{
 			PackageId: id,
 		})
 
 	if err != nil {
-		log.Error("Delete package failed:", slog.Uint64("id", id), slog.Any("error", err))
-		return err
+		return false, fmt.Errorf("grpc.DeletePackage: %w", err)
 	}
 
-	if response.Removed {
-		log.Debug("Package deleted", slog.Uint64("id", id))
-		return nil
-	} else { // false прилетает если package not found
-		log.Debug("Package not found", slog.Uint64("id", id))
-		return model.NotFound
-	}
+	return response.Removed, nil
 }
 
 // GetPackage вызывает gRPC функцию GetPackageV1
-func (client *grpsClient) GetPackage(ctx context.Context, id uint64) (*model.Package, error) {
+func (client *grpcClient) GetPackage(ctx context.Context, id uint64) (*model.Package, error) {
 
-	log := slog.With("func", "grpsClient.GetPackageV1")
-
-	response, err := client.Send.GetPackageV1(
+	response, err := client.send.GetPackageV1(
 		ctx,
 		&pb.GetPackageV1Request{
 			PackageId: id,
 		})
 
 	if err != nil {
-		log.Error("Get package failed:", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("grpc.GetPackageV1: %w", err)
 	}
 
 	pkg := model.Package{}
 	pkg.FromProto(response.Value)
 
-	log.Debug("Get package", slog.String("package", pkg.String()))
-
 	return &pkg, nil
 }
 
 // ListPackages вызывает gRPC функцию ListPackagesV1
-func (client *grpsClient) ListPackages(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error) {
+func (client *grpcClient) ListPackages(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error) {
 
-	log := slog.With("func", "grpsClient.ListPackagesV1")
-
-	response, err := client.Send.ListPackagesV1(
+	response, err := client.send.ListPackagesV1(
 		ctx,
 		&pb.ListPackagesV1Request{
 			Offset: offset,
@@ -100,8 +80,7 @@ func (client *grpsClient) ListPackages(ctx context.Context, offset uint64, limit
 		})
 
 	if err != nil {
-		log.Error("List packages failed:", slog.Any("error", err))
-		return nil, err
+		return nil, fmt.Errorf("grpc.ListPackages: %w", err)
 	}
 
 	packages := make([]model.Package, len(response.Packages))
@@ -109,17 +88,13 @@ func (client *grpsClient) ListPackages(ctx context.Context, offset uint64, limit
 		packages[i].FromProto(response.Packages[i])
 	}
 
-	log.Debug("List packages", slog.Uint64("offset", offset), slog.Uint64("limit", limit))
-
 	return packages, nil
 }
 
 // UpdatePackage вызывает gRPC функцию UpdatePackageV1
-func (client *grpsClient) UpdatePackage(ctx context.Context, id uint64, pkg model.Package) error {
+func (client *grpcClient) UpdatePackage(ctx context.Context, id uint64, pkg model.Package) (bool, error) {
 
-	log := slog.With("func", "grpsClient.UpdatePackageV1")
-
-	response, err := client.Send.UpdatePackageV1(
+	response, err := client.send.UpdatePackageV1(
 		ctx,
 		&pb.UpdatePackageV1Request{
 			PackageId: id,
@@ -127,22 +102,16 @@ func (client *grpsClient) UpdatePackage(ctx context.Context, id uint64, pkg mode
 		})
 
 	if err != nil {
-		log.Error("Update package failed:", slog.Uint64("id", id), slog.Any("error", err))
-		return err
+		return false, fmt.Errorf("grpc.UpdatePackage: %w", err)
 	}
 
-	if response.Updated {
-		log.Debug("Package updated", slog.String("package", pkg.String()))
-		return nil
-	} else { // false прилетает если package not found
-		log.Debug("Package not found", slog.Uint64("id", id))
-		return model.NotFound
-	}
+	return response.Updated, nil
 }
 
 // NewGrpcClient инициализирует соединение с gRPC сервером
-func NewGrpcClient() *grpsClient {
-	log := slog.With("func", "grpsClient.NewGrpcClient")
+func NewGrpcClient() *grpcClient {
+
+	log := slog.With("func", "grpcClient.NewGrpcClient")
 
 	cfg := config.GetConfigInstance()
 
@@ -158,17 +127,17 @@ func NewGrpcClient() *grpsClient {
 	}
 
 	log.Info("gRPC client connected", slog.Any("address", cfg.GRPC.Host+":"+cfg.GRPC.Port))
-	return &grpsClient{
-		Send: pb.NewLogisticPackageApiServiceClient(conn), // инициализируем интерфейс через который будут вызываться удаленные методы
-		Conn: conn,
+	return &grpcClient{
+		send: pb.NewLogisticPackageApiServiceClient(conn), // инициализируем интерфейс через который будут вызываться удаленные методы
+		conn: conn,
 	}
 }
 
 // Close закрывает соединение с gRPC сервером
-func (client *grpsClient) Close() {
-	log := slog.With("func", "grpsClient.Close")
+func (client *grpcClient) Close() {
+	log := slog.With("func", "grpcClient.Close")
 
-	client.Conn.Close()
+	client.conn.Close()
 
 	log.Info("gRPC client disconnected")
 }

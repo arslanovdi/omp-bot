@@ -13,29 +13,33 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 
 	log := slog.With("func", "packageCommander.New")
 
-	name := message.CommandArguments()
+	args := message.CommandArguments()
 
-	if len(name) == 0 {
+	pkg := model.Package{}
+
+	_, err := fmt.Sscanf(args, "%s %d", &pkg.Title, &pkg.Weight)
+
+	if len(pkg.Title) == 0 || pkg.Weight <= 0 || err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("wrong args"))
-		log.Info("fail to create package", slog.String("name", name))
+		log.Info("fail to create package", slog.String("package", pkg.String()))
 		return
 	}
 
-	id, err := c.packageService.Create(model.Package{
-		Title:     name,
-		Weight:    0, // TODO добавить вес в параметры команд телеграма
-		CreatedAt: time.Now(),
-	})
+	pkg.CreatedAt = time.Now()
+
+	id, err := c.packageService.Create(pkg)
 
 	if err != nil {
-		c.errorResponseCommand(message, fmt.Sprintf("Fail to create package with name %v", name))
-		log.Error("fail to create package", slog.String("name", name), slog.Any("error", err))
+		c.errorResponseCommand(message, fmt.Sprintf("Fail to create package with title %v", pkg.Title))
+		log.Error("fail to create package", slog.String("package", pkg.String()), slog.Any("error", err))
 		return
 	}
+
+	log.Debug("Package created", slog.Uint64("id", id), slog.String("package", pkg.String()))
 
 	msg := tgbotapi.NewMessage(
 		message.Chat.ID,
-		fmt.Sprintf("package %v created with id: %d", name, id),
+		fmt.Sprintf("package %v created with id: %d", pkg.Title, id),
 	)
 
 	_, err = c.bot.Send(msg)

@@ -48,8 +48,10 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 		}
 	}
 
+	log.Debug("List packages", slog.Uint64("offset", uint64(parsedData.Offset)+limit), slog.Uint64("limit", limit))
+
 	for _, p := range packages {
-		outputMsgText.WriteString(p.Title)
+		outputMsgText.WriteString(p.String())
 		outputMsgText.WriteString("\n")
 	}
 

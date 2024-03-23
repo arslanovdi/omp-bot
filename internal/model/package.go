@@ -2,13 +2,13 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	pb "github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"time"
 )
 
 var EndOfList = errors.New("end of list")
-var NotFound = errors.New("not found")
 
 type Package struct {
 	ID        uint64
@@ -18,7 +18,7 @@ type Package struct {
 }
 
 func (c *Package) String() string {
-	return c.Title
+	return fmt.Sprintf("ID: %d, Title: %s, Weight: %d, CreatedAt: %s", c.ID, c.Title, c.Weight, c.CreatedAt)
 }
 
 func (c *Package) ToProto() *pb.Package {

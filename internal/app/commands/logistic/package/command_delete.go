@@ -34,11 +34,13 @@ func (c *packageCommander) Delete(message *tgbotapi.Message) {
 			message.Chat.ID,
 			fmt.Sprintf("Package with id: %d deleted", id),
 		)
+		log.Info("Package deleted", slog.Uint64("id", uint64(id)))
 	} else {
 		msg = tgbotapi.NewMessage(
 			message.Chat.ID,
-			fmt.Sprintf("Package with id: %d NOT deleted", id),
+			fmt.Sprintf("Package with id: %d NOT found", id),
 		)
+		log.Info("Package not found", slog.Uint64("id", uint64(id)))
 	}
 
 	_, err = c.bot.Send(msg)

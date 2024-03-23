@@ -10,14 +10,14 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-type Commander interface {
+type LogisticCommander interface {
 	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath)
 	HandleCommand(callback *tgbotapi.Message, commandPath path.CommandPath)
 }
 
 type Router struct {
 	bot               *tgbotapi.BotAPI
-	logisticCommander Commander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
+	logisticCommander LogisticCommander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
 
 }
 
@@ -98,7 +98,7 @@ func (c *Router) showCommandFormat(inputMessage *tgbotapi.Message) {
 
 	log := slog.With("func", "Router.showCommandFormat")
 
-	outputMsg := tgbotapi.NewMessage(inputMessage.Chat.ID, "Command format: /{command}__{domain}__{subdomain}")
+	outputMsg := tgbotapi.NewMessage(inputMessage.Chat.ID, "Command format: /{command}__logistic__package")
 
 	_, err := c.bot.Send(outputMsg)
 	if err != nil {

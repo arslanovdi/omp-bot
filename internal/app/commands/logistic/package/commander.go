@@ -2,28 +2,19 @@ package _package
 
 import (
 	"github.com/arslanovdi/omp-bot/internal/app/path"
-	"github.com/arslanovdi/omp-bot/internal/model"
+	"github.com/arslanovdi/omp-bot/internal/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log/slog"
 )
-
-// PackageService интерфейс слоя бизнес-логики
-type PackageService interface {
-	Create(model.Package) (uint64, error)
-	Delete(packageID uint64) (bool, error)
-	Get(cursor uint64) (model.Package, error)
-	List(cursor uint64, limit uint64) ([]model.Package, error)
-	Update(packageID uint64, pkg model.Package) error
-}
 
 const limit = 10 // кол-во package выдаваемое за 1 раз
 
 type packageCommander struct {
 	bot            *tgbotapi.BotAPI
-	packageService PackageService
+	packageService *service.LogisticPackageService
 }
 
-func NewPackageCommander(bot *tgbotapi.BotAPI, service PackageService) *packageCommander {
+func NewPackageCommander(bot *tgbotapi.BotAPI, service *service.LogisticPackageService) *packageCommander {
 
 	return &packageCommander{
 		bot:            bot,
@@ -83,7 +74,7 @@ func (c *packageCommander) errorResponseCommand(message *tgbotapi.Message, resp 
 // errorResponseCallback возвращает сообщение об ошибке в бот
 func (c *packageCommander) errorResponseCallback(callback *tgbotapi.CallbackQuery, resp string) {
 
-	log := slog.With("func", "PackageCommander.errorResponseCallback")
+	log := slog.With("func", "packageCommander.errorResponseCallback")
 
 	msg := tgbotapi.NewMessage(
 		callback.Message.Chat.ID,

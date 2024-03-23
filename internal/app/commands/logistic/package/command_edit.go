@@ -13,26 +13,37 @@ func (c *packageCommander) Edit(message *tgbotapi.Message) {
 	log := slog.With("func", "packageCommander.Edit")
 
 	args := message.CommandArguments()
-	id := uint64(0)
-	name := ""
-	_, err := fmt.Sscanf(args, "%d %s", &id, &name)
-	if err != nil || len(name) == 0 {
+
+	pkg := model.Package{}
+
+	_, err := fmt.Sscanf(args, "%d %s %d", &pkg.ID, &pkg.Title, &pkg.Weight)
+	if err != nil || len(pkg.Title) == 0 || pkg.Weight <= 0 {
 		c.errorResponseCommand(message, fmt.Sprintf("wrong args %v\n", args))
 		log.Info("wrong args", slog.Any("args", args))
 		return
 	}
 
-	err = c.packageService.Update(id, model.Package{Title: name})
+	ok, err := c.packageService.Update(pkg.ID, pkg)
 	if err != nil {
-		c.errorResponseCommand(message, fmt.Sprintf("Fail to edit package with id %d", id))
-		log.Error("fail to edit package", slog.Uint64("id", id), slog.Any("error", err))
+		c.errorResponseCommand(message, fmt.Sprintf("Fail to edit package with id %d", pkg.ID))
+		log.Error("fail to edit package", slog.Uint64("id", pkg.ID), slog.Any("error", err))
 		return
 	}
 
-	msg := tgbotapi.NewMessage(
-		message.Chat.ID,
-		fmt.Sprintf("package id: %d renamed to %s", id, name),
-	)
+	var msg tgbotapi.MessageConfig
+	if ok {
+		msg = tgbotapi.NewMessage(
+			message.Chat.ID,
+			fmt.Sprintf("Package with id: %d updated", pkg.ID),
+		)
+		log.Debug("Package updated", slog.Uint64("id", pkg.ID))
+	} else {
+		msg = tgbotapi.NewMessage(
+			message.Chat.ID,
+			fmt.Sprintf("Package with id: %d NOT found", pkg.ID),
+		)
+		log.Debug("Package not found", slog.Uint64("id", pkg.ID))
+	}
 
 	_, err = c.bot.Send(msg)
 	if err != nil {

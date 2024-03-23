@@ -1,3 +1,4 @@
 grpc:
   host: localhost
   port: 8082
+  ctxTimeout: 5s

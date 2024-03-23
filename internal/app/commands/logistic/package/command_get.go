@@ -27,6 +27,7 @@ func (c *packageCommander) Get(message *tgbotapi.Message) {
 		log.Error("fail to get product", slog.Uint64("id", uint64(id)), slog.Any("error", err))
 		return
 	}
+	log.Debug("get package", slog.Any("pkg", pkg))
 
 	msg := tgbotapi.NewMessage(
 		message.Chat.ID,

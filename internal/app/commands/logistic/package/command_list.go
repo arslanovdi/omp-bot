@@ -33,7 +33,7 @@ func (c *packageCommander) List(message *tgbotapi.Message) {
 	}
 
 	for _, p := range packages {
-		outputMsgText.WriteString(p.Title)
+		outputMsgText.WriteString(p.String())
 		outputMsgText.WriteString("\n")
 	}
 

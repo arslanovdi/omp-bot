@@ -33,7 +33,11 @@ func main() {
 		}
 	}()
 
-	config.ReadConfigYML("config.yml")
+	err := config.ReadConfigYML("config.yml")
+	if err != nil {
+		log.Warn("Failed to read config", slog.Any("error", err))
+		os.Exit(1)
+	}
 
 	_ = godotenv.Load()
 
@@ -43,19 +47,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	grpcClient := grpc.NewGrpcClient()
+	packageService := service.NewPackageService(grpcClient)
+
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Warn("Failed to create new bot", slog.Any("error", err))
 		os.Exit(1)
 	}
 
+	log.Info("Telegram bot authorized on account ", slog.String("account", bot.Self.UserName))
+
 	// Uncomment if you want debugging
 	// bot.Debug = true
-
-	grpcClient := grpc.NewGrpcClient()
-	packageService := service.NewPackageService(grpcClient)
-
-	log.Info("Telegram bot authorized on account ", slog.String("account", bot.Self.UserName))
 
 	u := tgbotapi.UpdateConfig{
 		Timeout: 60,
