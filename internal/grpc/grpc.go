@@ -6,7 +6,9 @@ import (
 	"github.com/arslanovdi/omp-bot/internal/config"
 	"github.com/arslanovdi/omp-bot/internal/model"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 	"log/slog"
 	"os"
 )
@@ -47,7 +49,7 @@ func (client *grpcClient) DeletePackage(ctx context.Context, id uint64) (bool, e
 		return false, fmt.Errorf("grpc.DeletePackage: %w", err)
 	}
 
-	return response.Removed, nil
+	return response.Deleted, nil
 }
 
 // GetPackage вызывает gRPC функцию GetPackageV1
@@ -72,15 +74,22 @@ func (client *grpcClient) GetPackage(ctx context.Context, id uint64) (*model.Pac
 // ListPackages вызывает gRPC функцию ListPackagesV1
 func (client *grpcClient) ListPackages(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error) {
 
-	response, err := client.send.ListPackagesV1(
+	response, err1 := client.send.ListPackagesV1(
 		ctx,
 		&pb.ListPackagesV1Request{
 			Offset: offset,
 			Limit:  limit,
 		})
 
-	if err != nil {
-		return nil, fmt.Errorf("grpc.ListPackages: %w", err)
+	if err1 != nil {
+		status, ok := status.FromError(err1)
+		if !ok {
+			return nil, fmt.Errorf("grpc.ListPackages: %w", err1)
+		}
+		if status.Code() == codes.NotFound {
+			return nil, model.EndOfList
+		}
+		return nil, fmt.Errorf("grpc.ListPackages: %w", err1)
 	}
 
 	packages := make([]model.Package, len(response.Packages))
@@ -118,11 +127,11 @@ func NewGrpcClient() *grpcClient {
 	// подключение к grpc серверу без TLS
 	conn, err := grpc.Dial(
 		cfg.GRPC.Host+":"+cfg.GRPC.Port,
-		grpc.WithBlock(),
+		grpc.WithBlock(), // ожидание подключения
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
-		log.Warn("did not connect", slog.Any("error", err))
+		log.Warn("did not connect", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 

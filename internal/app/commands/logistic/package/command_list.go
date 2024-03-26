@@ -27,7 +27,7 @@ func (c *packageCommander) List(message *tgbotapi.Message) {
 			endOfList = true
 		} else {
 			c.errorResponseCommand(message, fmt.Sprintf("Ошибка получения списка"))
-			log.Error("fail to get list of packages", slog.Any("error", err))
+			log.Error("fail to get list of packages", slog.String("error", err.Error()))
 			return
 		}
 	}
@@ -60,6 +60,6 @@ func (c *packageCommander) List(message *tgbotapi.Message) {
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"log/slog"
 )
 
-const limit = 10 // кол-во package выдаваемое за 1 раз
+const limit = 2 // кол-во package выдаваемое за 1 раз
 
 type packageCommander struct {
 	bot            *tgbotapi.BotAPI
@@ -67,7 +67,7 @@ func (c *packageCommander) errorResponseCommand(message *tgbotapi.Message, resp 
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }
 
@@ -82,6 +82,6 @@ func (c *packageCommander) errorResponseCallback(callback *tgbotapi.CallbackQuer
 	)
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

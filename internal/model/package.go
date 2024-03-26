@@ -23,6 +23,7 @@ func (c *Package) String() string {
 
 func (c *Package) ToProto() *pb.Package {
 	return &pb.Package{
+		Id:     c.ID,
 		Title:  c.Title,
 		Weight: &c.Weight,
 		Created: &timestamp.Timestamp{

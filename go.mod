@@ -3,7 +3,7 @@ module github.com/arslanovdi/omp-bot
 go 1.22.1
 
 require (
-	github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api v0.0.0-20240323094417-2be759824bf2
+	github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api v0.0.0-20240324111018-eeb5c06d5e3a
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/golang/protobuf v1.5.4
 	github.com/joho/godotenv v1.5.1

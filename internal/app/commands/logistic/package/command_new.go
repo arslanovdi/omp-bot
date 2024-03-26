@@ -21,7 +21,7 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 
 	if len(pkg.Title) == 0 || pkg.Weight <= 0 || err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("wrong args"))
-		log.Info("fail to create package", slog.String("package", pkg.String()))
+		log.Info("wrong args", slog.String("package", pkg.String()))
 		return
 	}
 
@@ -31,7 +31,7 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 
 	if err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("Fail to create package with title %v", pkg.Title))
-		log.Error("fail to create package", slog.String("package", pkg.String()), slog.Any("error", err))
+		log.Error("fail to create package", slog.String("package", pkg.String()), slog.String("error", err.Error()))
 		return
 	}
 
@@ -44,6 +44,6 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

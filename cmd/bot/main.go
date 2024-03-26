@@ -35,7 +35,7 @@ func main() {
 
 	err := config.ReadConfigYML("config.yml")
 	if err != nil {
-		log.Warn("Failed to read config", slog.Any("error", err))
+		log.Warn("Failed to read config", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
@@ -52,7 +52,7 @@ func main() {
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Warn("Failed to create new bot", slog.Any("error", err))
+		log.Warn("Failed to create new bot", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 

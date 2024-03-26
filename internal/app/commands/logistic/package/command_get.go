@@ -2,10 +2,8 @@ package _package
 
 import (
 	"fmt"
-	"log/slog"
-	"strconv"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log/slog"
 )
 
 func (c *packageCommander) Get(message *tgbotapi.Message) {
@@ -14,17 +12,18 @@ func (c *packageCommander) Get(message *tgbotapi.Message) {
 
 	args := message.CommandArguments()
 
-	id, err := strconv.Atoi(args)
+	id := uint64(0)
+	_, err := fmt.Sscanf(args, "%d", &id)
 	if err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("wrong args %v", args))
-		log.Info("wrong args", slog.Any("args", args))
+		log.Info("wrong args", slog.Any("args", args), slog.String("error", err.Error()))
 		return
 	}
 
-	pkg, err := c.packageService.Get(uint64(id))
+	pkg, err := c.packageService.Get(id)
 	if err != nil {
 		c.errorResponseCommand(message, fmt.Sprintf("Package with id: %d not found.\n", id))
-		log.Error("fail to get product", slog.Uint64("id", uint64(id)), slog.Any("error", err))
+		log.Error("fail to get product", slog.Uint64("id", id), slog.String("error", err.Error()))
 		return
 	}
 	log.Debug("get package", slog.Any("pkg", pkg))
@@ -36,6 +35,6 @@ func (c *packageCommander) Get(message *tgbotapi.Message) {
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

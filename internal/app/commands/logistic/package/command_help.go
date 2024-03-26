@@ -15,8 +15,8 @@ func (c *packageCommander) Help(message *tgbotapi.Message) {
 	str.WriteString("/get__logistic__package - get package (id)\n")
 	str.WriteString("/list__logistic__package - list of packages\n")
 	str.WriteString("/delete__logistic__package - delete package (id)\n")
-	str.WriteString("/new__logistic__package - new package (name, weight)\n")
-	str.WriteString("/edit__logistic__package - set new package name (id, name, weight)\n")
+	str.WriteString("/new__logistic__package - new package (title, weight)\n")
+	str.WriteString("/edit__logistic__package - set new package title (id, title, weight)\n")
 
 	msg := tgbotapi.NewMessage(message.Chat.ID,
 		str.String(),
@@ -24,6 +24,6 @@ func (c *packageCommander) Help(message *tgbotapi.Message) {
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

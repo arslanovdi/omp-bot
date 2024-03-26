@@ -27,14 +27,19 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 		c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
 		log.Error("fail to read json data for type CallbackListData from input string",
 			slog.String("input string", callbackPath.CallbackData),
-			slog.Any("error", err))
+			slog.String("error", err.Error()))
 		return
 	}
 
 	outputMsgText := strings.Builder{}
-	outputMsgText.WriteString("These are our packages: \n\n")
 
 	packages, err := c.packageService.List(uint64(parsedData.Offset)+limit, limit) // Запрашиваем клиентов со смещением
+
+	if len(packages) > 0 {
+		outputMsgText.WriteString("These are our packages: \n\n")
+	} else {
+		outputMsgText.WriteString("There are no packages\n")
+	}
 
 	var endOfList bool
 
@@ -43,7 +48,7 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 			endOfList = true
 		} else {
 			c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
-			log.Error("fail to get list of packages", slog.Any("error", err))
+			log.Error("fail to get list of packages", slog.String("error", err.Error()))
 			return
 		}
 	}
@@ -72,6 +77,6 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

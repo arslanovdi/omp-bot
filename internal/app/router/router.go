@@ -57,7 +57,7 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 
 	callbackPath, err := path.ParseCallback(callback.Data)
 	if err != nil {
-		log.Info("error parsing callback data", slog.String("data", callback.Data), slog.Any("error", err))
+		log.Info("error parsing callback data", slog.String("data", callback.Data), slog.String("error", err.Error()))
 		return
 	}
 
@@ -81,7 +81,7 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 
 	commandPath, err := path.ParseCommand(msg.Command())
 	if err != nil {
-		log.Error("error parsing command", slog.String("command", msg.Command()), slog.Any("error", err))
+		log.Error("error parsing command", slog.String("command", msg.Command()), slog.String("error", err.Error()))
 		return
 	}
 
@@ -102,6 +102,6 @@ func (c *Router) showCommandFormat(inputMessage *tgbotapi.Message) {
 
 	_, err := c.bot.Send(outputMsg)
 	if err != nil {
-		log.Error("error sending reply message to chat", slog.Any("error", err))
+		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
 }

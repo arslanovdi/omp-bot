@@ -1,5 +1,7 @@
 github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api v0.0.0-20240323094417-2be759824bf2 h1:z7PjIHrXhaTOjpfKl0fn3HW+8/5X+eKQdlZLoF8hs7o=
 github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api v0.0.0-20240323094417-2be759824bf2/go.mod h1:MKOm9/4887TxS3YN045rC8heL4VLYVXSMvGMDznxopA=
+github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api v0.0.0-20240324111018-eeb5c06d5e3a h1:sXRwoc2VnQ4Ov/4oDgeyBwpe5WPJTQqvFdFLIHtm7B0=
+github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api v0.0.0-20240324111018-eeb5c06d5e3a/go.mod h1:MKOm9/4887TxS3YN045rC8heL4VLYVXSMvGMDznxopA=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/envoyproxy/protoc-gen-validate v1.0.4 h1:gVPz/FMfvh57HdSJQyvBtF00j8JU4zdyUgIUNhlgg0A=
 github.com/envoyproxy/protoc-gen-validate v1.0.4/go.mod h1:qys6tmnRsYrQqIhm2bvKZH4Blx/1gTIZ2UKVY1M+Yew=
