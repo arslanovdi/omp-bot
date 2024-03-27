@@ -1,7 +1,9 @@
 package _package
 
 import (
+	"errors"
 	"fmt"
+	"github.com/arslanovdi/omp-bot/internal/model"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log/slog"
 )
@@ -22,11 +24,14 @@ func (c *packageCommander) Get(message *tgbotapi.Message) {
 
 	pkg, err := c.packageService.Get(id)
 	if err != nil {
-		c.errorResponseCommand(message, fmt.Sprintf("Package with id: %d not found.\n", id))
 		log.Error("fail to get product", slog.Uint64("id", id), slog.String("error", err.Error()))
+		if errors.Is(err, model.ErrNotFound) {
+			c.errorResponseCommand(message, fmt.Sprintf("Package with id: %d not found.\n", id))
+			return
+		}
+		c.errorResponseCommand(message, "fail to get product\n")
 		return
 	}
-	log.Debug("get package", slog.Any("pkg", pkg))
 
 	msg := tgbotapi.NewMessage(
 		message.Chat.ID,
@@ -37,4 +42,6 @@ func (c *packageCommander) Get(message *tgbotapi.Message) {
 	if err != nil {
 		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
+
+	log.Debug("get package", slog.Any("pkg", pkg))
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/arslanovdi/omp-bot/internal/model"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log/slog"
+	"strings"
 	"time"
 )
 
@@ -17,15 +18,33 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 
 	pkg := model.Package{}
 
-	_, err := fmt.Sscanf(args, "%s %d", &pkg.Title, &pkg.Weight)
+	var err error
+	// Обработка опционального параметра Weight
+	switch strings.Count(args, " ") {
+	case 0:
+		_, err = fmt.Sscanf(args, "%s", &pkg.Title)
+		if err != nil || len(pkg.Title) == 0 {
+			log.Info("wrong args", slog.Any("args", args), slog.String("error", err.Error()))
+			err = fmt.Errorf("wrong args %v\n", args)
+		}
+	case 1:
+		pkg.Weight = new(uint64)
+		_, err = fmt.Sscanf(args, "%s %d", &pkg.Title, pkg.Weight)
+		if err != nil || len(pkg.Title) == 0 || *pkg.Weight == 0 {
+			log.Info("wrong args", slog.Any("args", args), slog.String("error", err.Error()))
+			err = fmt.Errorf("wrong args %v\n", args)
+		}
+	default:
+		log.Info("wrong args count", slog.Any("args", args))
+		err = fmt.Errorf("wrong args %v\n", args)
+	}
 
-	if len(pkg.Title) == 0 || pkg.Weight <= 0 || err != nil {
-		c.errorResponseCommand(message, fmt.Sprintf("wrong args"))
-		log.Info("wrong args", slog.String("package", pkg.String()))
+	if err != nil {
+		c.errorResponseCommand(message, err.Error())
 		return
 	}
 
-	pkg.CreatedAt = time.Now()
+	pkg.Created = time.Now()
 
 	id, err := c.packageService.Create(pkg)
 
@@ -34,8 +53,6 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 		log.Error("fail to create package", slog.String("package", pkg.String()), slog.String("error", err.Error()))
 		return
 	}
-
-	log.Debug("Package created", slog.Uint64("id", id), slog.String("package", pkg.String()))
 
 	msg := tgbotapi.NewMessage(
 		message.Chat.ID,
@@ -46,4 +63,6 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 	if err != nil {
 		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
+
+	log.Debug("Package created", slog.Uint64("id", id), slog.String("package", pkg.String()))
 }

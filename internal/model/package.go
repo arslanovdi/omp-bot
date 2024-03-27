@@ -1,41 +1,79 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	pb "github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"log/slog"
+	"strings"
 	"time"
 )
 
-var EndOfList = errors.New("end of list")
-
 type Package struct {
-	ID        uint64
-	Title     string
-	Weight    uint64
-	CreatedAt time.Time
+	ID      uint64
+	Title   string
+	Weight  *uint64
+	Created time.Time
+	Updated *time.Time
 }
 
 func (c *Package) String() string {
-	return fmt.Sprintf("ID: %d, Title: %s, Weight: %d, CreatedAt: %s", c.ID, c.Title, c.Weight, c.CreatedAt)
+	str := strings.Builder{}
+
+	str.WriteString(fmt.Sprintf("ID: %d, Title: %s", c.ID, c.Title))
+	if c.Weight != nil {
+		str.WriteString(fmt.Sprintf(", Weight: %d", *c.Weight))
+	}
+	str.WriteString(fmt.Sprintf(", Created: %s", c.Created))
+	if c.Updated != nil {
+		str.WriteString(fmt.Sprintf(", Updated: %s", c.Updated))
+	}
+
+	return str.String()
+}
+
+// LogValue implements slog.LogValuer interface
+// вывод Package в лог
+func (c *Package) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.Uint64("ID", c.ID),
+		slog.String("Title", c.Title),
+		slog.Any("Weight", *c.Weight),
+		slog.Time("Created", c.Created),
+		slog.Any("Updated", *c.Updated),
+	)
 }
 
 func (c *Package) ToProto() *pb.Package {
+
+	var update *timestamp.Timestamp
+	if c.Updated != nil {
+		update = &timestamp.Timestamp{
+			Seconds: c.Updated.Unix(),
+			Nanos:   int32(c.Updated.Nanosecond()),
+		}
+	}
+
 	return &pb.Package{
 		Id:     c.ID,
 		Title:  c.Title,
-		Weight: &c.Weight,
+		Weight: c.Weight,
 		Created: &timestamp.Timestamp{
-			Seconds: c.CreatedAt.Unix(),
-			Nanos:   int32(c.CreatedAt.Nanosecond()),
+			Seconds: c.Created.Unix(),
+			Nanos:   int32(c.Created.Nanosecond()),
 		},
+		Updated: update,
 	}
 }
 
 func (c *Package) FromProto(pkg *pb.Package) {
 	c.ID = pkg.Id
 	c.Title = pkg.Title
-	c.Weight = *pkg.Weight
-	c.CreatedAt = time.Unix(pkg.Created.Seconds, int64(pkg.Created.Nanos))
+	c.Weight = pkg.Weight
+	c.Created = time.Unix(pkg.Created.Seconds, int64(pkg.Created.Nanos))
+	if pkg.Updated != nil {
+		c.Updated = &time.Time{}
+		*c.Updated = time.Unix(pkg.Updated.Seconds, int64(pkg.Updated.Nanos))
+	}
+
 }

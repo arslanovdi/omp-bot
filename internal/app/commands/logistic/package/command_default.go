@@ -19,4 +19,6 @@ func (c *packageCommander) Default(message *tgbotapi.Message) {
 	if err != nil {
 		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
+
+	log.Debug("Default command")
 }

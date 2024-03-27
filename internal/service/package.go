@@ -9,11 +9,11 @@ import (
 
 // Client интерфейс grpc клиента
 type Client interface {
-	CreatePackage(ctx context.Context, pkg model.Package) (*uint64, error)
-	DeletePackage(ctx context.Context, id uint64) (bool, error)
-	GetPackage(ctx context.Context, id uint64) (*model.Package, error)
-	ListPackages(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error)
-	UpdatePackage(ctx context.Context, cursor uint64, pkg model.Package) (bool, error)
+	Create(ctx context.Context, pkg model.Package) (*uint64, error)
+	Delete(ctx context.Context, id uint64) error
+	Get(ctx context.Context, id uint64) (*model.Package, error)
+	List(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error)
+	Update(ctx context.Context, pkg model.Package) error
 }
 
 // LogisticPackageService слой бизнес-логики

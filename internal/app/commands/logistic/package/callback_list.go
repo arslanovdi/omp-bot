@@ -35,26 +35,23 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 
 	packages, err := c.packageService.List(uint64(parsedData.Offset)+limit, limit) // Запрашиваем клиентов со смещением
 
-	if len(packages) > 0 {
-		outputMsgText.WriteString("These are our packages: \n\n")
-	} else {
-		outputMsgText.WriteString("There are no packages\n")
-	}
-
 	var endOfList bool
 
 	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			c.errorResponseCallback(callback, "packages not found")
+			return
+		}
 		if errors.Is(err, model.EndOfList) {
 			endOfList = true
 		} else {
-			c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
+			c.errorResponseCallback(callback, fmt.Sprintf("Ошибка получения списка"))
 			log.Error("fail to get list of packages", slog.String("error", err.Error()))
 			return
 		}
 	}
 
-	log.Debug("List packages", slog.Uint64("offset", uint64(parsedData.Offset)+limit), slog.Uint64("limit", limit))
-
+	outputMsgText.WriteString("These are our packages: \n\n")
 	for _, p := range packages {
 		outputMsgText.WriteString(p.String())
 		outputMsgText.WriteString("\n")
@@ -79,4 +76,6 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 	if err != nil {
 		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
+
+	log.Debug("Callback List packages", slog.Uint64("offset", uint64(parsedData.Offset)+limit), slog.Uint64("limit", limit))
 }

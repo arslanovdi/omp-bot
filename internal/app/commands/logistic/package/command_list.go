@@ -23,6 +23,10 @@ func (c *packageCommander) List(message *tgbotapi.Message) {
 	var endOfList bool
 
 	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			c.errorResponseCommand(message, "packages not found")
+			return
+		}
 		if errors.Is(err, model.EndOfList) {
 			endOfList = true
 		} else {
@@ -62,4 +66,6 @@ func (c *packageCommander) List(message *tgbotapi.Message) {
 	if err != nil {
 		log.Error("error sending reply message to chat", slog.String("error", err.Error()))
 	}
+
+	log.Debug("Command List packages", slog.Uint64("offset", 1), slog.Uint64("limit", limit))
 }

@@ -7,7 +7,7 @@ import (
 	"log/slog"
 )
 
-const limit = 2 // кол-во package выдаваемое за 1 раз
+const limit = 10 // кол-во package выдаваемое за 1 раз
 
 type packageCommander struct {
 	bot            *tgbotapi.BotAPI

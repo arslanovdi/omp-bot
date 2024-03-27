@@ -7,15 +7,15 @@ import (
 )
 
 // Update изменяем существующий пакет
-func (c *LogisticPackageService) Update(cursor uint64, pkg model.Package) (bool, error) {
+func (c *LogisticPackageService) Update(pkg model.Package) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), c.ctxTimeout)
 	defer cancel()
 
-	ok, err := c.api.UpdatePackage(ctx, cursor, pkg)
+	err := c.api.Update(ctx, pkg)
 	if err != nil {
-		return false, fmt.Errorf("service.Update: %w", err)
+		return fmt.Errorf("service.Update: %w", err)
 	}
 
-	return ok, nil
+	return nil
 }
