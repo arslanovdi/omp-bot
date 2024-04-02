@@ -5,12 +5,15 @@ import (
 	"errors"
 	routerPkg "github.com/arslanovdi/omp-bot/internal/app/router"
 	"github.com/arslanovdi/omp-bot/internal/config"
+	"github.com/arslanovdi/omp-bot/internal/fake"
 	"github.com/arslanovdi/omp-bot/internal/grpc"
 	"github.com/arslanovdi/omp-bot/internal/logger"
 	"github.com/arslanovdi/omp-bot/internal/service"
+	"github.com/arslanovdi/omp-bot/internal/tracer"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"log/slog"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -47,6 +50,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctxTrace, cancelTrace := context.WithCancel(context.Background())
+	defer cancelTrace()
+	trace, err := tracer.NewTracer(ctxTrace)
+	if err != nil {
+		log.Warn("Failed to init tracer", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
 	grpcClient := grpc.NewGrpcClient()
 	packageService := service.NewPackageService(grpcClient)
 
@@ -69,6 +80,9 @@ func main() {
 
 	routerHandler := routerPkg.NewRouter(bot, packageService) // Создаем обработчик телегрм бота
 
+	d := 200*time.Millisecond + time.Duration(rand.Intn(1000))*time.Millisecond // от 200ms до 1200 мс на одну операцию
+	go fake.Emulate(d, packageService)                                          // запускаем эмуляцию пользователей телеграм бота
+
 	cancel() // отменяем контекст запуска приложения
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT) // подписываем канал на сигналы завершения процесса
@@ -79,8 +93,11 @@ func main() {
 		case <-stop:
 			slog.Info("Graceful shutdown")
 			grpcClient.Close()
+			if err := trace.Shutdown(ctxTrace); err != nil {
+				log.Error("Error shutting down tracer provider", slog.String("error", err.Error()))
+			}
+			slog.Info("Application stopped")
 			return
 		}
 	}
-
 }

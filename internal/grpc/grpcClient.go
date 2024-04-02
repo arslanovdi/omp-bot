@@ -6,6 +6,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"os"
+
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 )
 
 import pb "github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api"
@@ -25,8 +27,10 @@ func NewGrpcClient() *grpcClient {
 	// подключение к grpc серверу без TLS
 	conn, err := grpc.Dial(
 		cfg.GRPC.Host+":"+cfg.GRPC.Port,
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()), // Трассировка
 		grpc.WithBlock(), // ожидание подключения
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 
 	if err != nil {
 		log.Warn("did not connect", slog.String("error", err.Error()))

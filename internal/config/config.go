@@ -11,13 +11,20 @@ import (
 var cfg *Config
 
 type Config struct {
-	GRPC grpc `yaml:"grpc"`
+	GRPC   grpc   `yaml:"grpc"`
+	Jaeger Jaeger `yaml:"jaeger"`
 }
 
 type grpc struct {
 	Host       string        `yaml:"host"`
 	Port       string        `yaml:"port"`
 	CtxTimeout time.Duration `yaml:"ctxTimeout"`
+}
+
+type Jaeger struct {
+	Service string `yaml:"service"`
+	Host    string `yaml:"host"`
+	Port    string `yaml:"port"`
 }
 
 // GetConfigInstance returns service config
