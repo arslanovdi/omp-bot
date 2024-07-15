@@ -1,4 +1,4 @@
-package _package
+package packaging
 
 import (
 	"log/slog"
@@ -7,9 +7,9 @@ import (
 )
 
 // Default ответ при неверной команде
-func (c *packageCommander) Default(message *tgbotapi.Message) {
+func (c *Commander) Default(message *tgbotapi.Message) {
 
-	log := slog.With("func", "packageCommander.Default")
+	log := slog.With("func", "Commander.Default")
 
 	log.Info("wrong command", slog.String("username", message.From.UserName), slog.String("message", message.Text))
 

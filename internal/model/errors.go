@@ -3,6 +3,8 @@ package model
 import "errors"
 
 var (
-	EndOfList   = errors.New("end of list")
+	// ErrEndOfList конец полученного от сервера списка пакетов
+	ErrEndOfList = errors.New("end of list")
+	// ErrNotFound пакет не найден
 	ErrNotFound = errors.New("not found")
 )

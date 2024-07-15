@@ -1,3 +1,4 @@
+// Package service слой бизнес-логики
 package service
 
 import (
@@ -22,6 +23,7 @@ type LogisticPackageService struct {
 	ctxTimeout time.Duration // Таймаут контекста gRPC запросов
 }
 
+// NewPackageService инициализирует слой бизнес-логики
 func NewPackageService(grpc Client) *LogisticPackageService {
 	cfg := config.GetConfigInstance()
 	srv := &LogisticPackageService{

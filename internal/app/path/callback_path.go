@@ -1,3 +1,4 @@
+// Package path парсинг команд бота
 package path
 
 import (
@@ -5,8 +6,6 @@ import (
 	"fmt"
 	"strings"
 )
-
-// Файл с обработкой нажатия кнопок
 
 // CallbackPath содержит параметры кнопок
 type CallbackPath struct {
@@ -16,6 +15,7 @@ type CallbackPath struct {
 	CallbackData string
 }
 
+// ErrUnknownCallback некорректная команда кнопки
 var ErrUnknownCallback = errors.New("unknown callback")
 
 // ParseCallback парсинг строки вида: "Domain__Subdomain__CallbackName__CallbackData" в структуру CallbackPath

@@ -18,7 +18,7 @@ func (c *LogisticPackageService) List(offset uint64, limit uint64) ([]model.Pack
 	}
 
 	if uint64(len(packages)) < limit {
-		return packages, model.EndOfList
+		return packages, model.ErrEndOfList
 	}
 
 	return packages, nil

@@ -11,9 +11,9 @@ import (
 )
 
 // List вызывает gRPC функцию ListV1
-func (client *grpcClient) List(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error) {
+func (client *Client) List(ctx context.Context, offset uint64, limit uint64) ([]model.Package, error) {
 
-	log := slog.With("func", "grpcClient.List")
+	log := slog.With("func", "GrpcClient.List")
 
 	response, err1 := client.send.ListV1(
 		ctx,

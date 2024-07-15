@@ -1,3 +1,4 @@
+// Package grpc предоставляет функции для работы с gRPC сервером
 package grpc
 
 import (
@@ -12,15 +13,16 @@ import (
 
 import pb "github.com/arslanovdi/logistic-package-api/pkg/logistic-package-api"
 
-type grpcClient struct {
+// Client - структура имплементирует интерфейс GrpcClient
+type Client struct {
 	send pb.LogisticPackageApiServiceClient
 	conn *grpc.ClientConn
 }
 
 // NewGrpcClient инициализирует соединение с gRPC сервером
-func NewGrpcClient() *grpcClient {
+func NewGrpcClient() *Client {
 
-	log := slog.With("func", "grpcClient.NewGrpcClient")
+	log := slog.With("func", "GrpcClient.NewGrpcClient")
 
 	cfg := config.GetConfigInstance()
 
@@ -38,17 +40,21 @@ func NewGrpcClient() *grpcClient {
 	}
 
 	log.Info("gRPC client connected", slog.Any("address", cfg.GRPC.Host+":"+cfg.GRPC.Port))
-	return &grpcClient{
+	return &Client{
 		send: pb.NewLogisticPackageApiServiceClient(conn), // инициализируем интерфейс через который будут вызываться удаленные методы
 		conn: conn,
 	}
 }
 
 // Close закрывает соединение с gRPC сервером
-func (client *grpcClient) Close() {
-	log := slog.With("func", "grpcClient.Close")
+func (client *Client) Close() {
+	log := slog.With("func", "GrpcClient.Close")
 
-	client.conn.Close()
+	err := client.conn.Close()
+	if err != nil {
+		log.Warn("did not close gRPC connection", slog.String("error", err.Error()))
+		return
+	}
 
 	log.Info("gRPC client disconnected")
 }

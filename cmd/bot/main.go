@@ -1,3 +1,4 @@
+// Телеграм бот для управления логистикой пакетов
 package main
 
 import (
@@ -13,7 +14,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"log/slog"
-	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,12 +36,13 @@ func main() {
 		}
 	}()
 
-	err := config.ReadConfigYML("config.yml")
-	if err != nil {
-		log.Warn("Failed to read config", slog.String("error", err.Error()))
+	err1 := config.ReadConfigYML("config.yml")
+	if err1 != nil {
+		log.Warn("Failed to read config", slog.String("error", err1.Error()))
 		os.Exit(1)
 	}
 
+	// TODO move to config
 	_ = godotenv.Load()
 
 	token, found := os.LookupEnv("TOKEN")
@@ -52,18 +53,18 @@ func main() {
 
 	ctxTrace, cancelTrace := context.WithCancel(context.Background())
 	defer cancelTrace()
-	trace, err := tracer.NewTracer(ctxTrace)
-	if err != nil {
-		log.Warn("Failed to init tracer", slog.String("error", err.Error()))
+	trace, err2 := tracer.New(ctxTrace)
+	if err2 != nil {
+		log.Warn("Failed to init tracer", slog.String("error", err2.Error()))
 		os.Exit(1)
 	}
 
 	grpcClient := grpc.NewGrpcClient()
 	packageService := service.NewPackageService(grpcClient)
 
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		log.Warn("Failed to create new bot", slog.String("error", err.Error()))
+	bot, err3 := tgbotapi.NewBotAPI(token)
+	if err3 != nil {
+		log.Warn("Failed to create new bot", slog.String("error", err3.Error()))
 		os.Exit(1)
 	}
 
@@ -78,10 +79,9 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u) // получаем канал обновлений телеграм бота
 
-	routerHandler := routerPkg.NewRouter(bot, packageService) // Создаем обработчик телегрм бота
+	routerHandler := routerPkg.New(bot, packageService) // Создаем обработчик телегрм бота
 
-	d := 200*time.Millisecond + time.Duration(rand.Intn(1000))*time.Millisecond // от 200ms до 1200 мс на одну операцию
-	go fake.Emulate(d, packageService)                                          // запускаем эмуляцию пользователей телеграм бота
+	go fake.Emulate(1000, packageService) // запускаем эмуляцию пользователей телеграм бота
 
 	cancel() // отменяем контекст запуска приложения
 	stop := make(chan os.Signal, 1)

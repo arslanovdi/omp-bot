@@ -1,3 +1,4 @@
+// Package tracer работа с трассировкой
 package tracer
 
 import (
@@ -12,24 +13,26 @@ import (
 	"go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-type tracer struct {
+// Tracer структура для трассировки через OpenTelemetry
+type Tracer struct {
 	exporter sdktrace.SpanExporter
 	provider *sdktrace.TracerProvider
 }
 
-func NewTracer(ctx context.Context) (*tracer, error) {
+// New инициализация трасссировки
+func New(ctx context.Context) (*Tracer, error) {
 	exporter, provider, err := initOtel(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &tracer{
+	return &Tracer{
 		exporter: exporter,
 		provider: provider,
 	}, nil
 }
 
 // Shutdown shuts down the trace exporter and trace provider.
-func (t *tracer) Shutdown(ctx context.Context) error {
+func (t *Tracer) Shutdown(ctx context.Context) error {
 
 	// Shutdown the trace provider.
 	err := t.provider.Shutdown(ctx)

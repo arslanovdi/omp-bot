@@ -1,3 +1,4 @@
+// Package router - роутер для обработки сообщений телеграм бота
 package router
 
 import (
@@ -10,18 +11,22 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+const myDomain = "logistic"
+
+// LogisticCommander - интерфейс представляет методы для обработки команд и кнопок телеграм бота
 type LogisticCommander interface {
 	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath)
 	HandleCommand(callback *tgbotapi.Message, commandPath path.CommandPath)
 }
 
+// Router - роутер для обработки сообщений телеграм бота
 type Router struct {
 	bot               *tgbotapi.BotAPI
 	logisticCommander LogisticCommander // экземпляр интерфейса обрабатывающий сообщения телеграм бота
-
 }
 
-func NewRouter(
+// New конструктор
+func New(
 	bot *tgbotapi.BotAPI,
 	pkgService *service.LogisticPackageService,
 ) *Router {
@@ -62,7 +67,7 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	}
 
 	switch callbackPath.Domain {
-	case "logistic":
+	case myDomain:
 		c.logisticCommander.HandleCallback(callback, callbackPath)
 	default:
 		log.Info("unknown domain", slog.String("domain", callbackPath.Domain))
@@ -86,7 +91,7 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	}
 
 	switch commandPath.Domain {
-	case "logistic":
+	case myDomain:
 		c.logisticCommander.HandleCommand(msg, commandPath)
 	default:
 		log.Info("unknown domain", slog.String("domain", commandPath.Domain))

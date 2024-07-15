@@ -8,7 +8,7 @@ import (
 )
 
 // Create вызывает gRPC функцию CreateV1
-func (client *grpcClient) Create(ctx context.Context, pkg model.Package) (*uint64, error) {
+func (client *Client) Create(ctx context.Context, pkg model.Package) (*uint64, error) {
 
 	response, err := client.send.CreateV1(
 		ctx,

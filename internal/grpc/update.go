@@ -11,9 +11,9 @@ import (
 )
 
 // Update вызывает gRPC функцию UpdateV1
-func (client *grpcClient) Update(ctx context.Context, pkg model.Package) error {
+func (client *Client) Update(ctx context.Context, pkg model.Package) error {
 
-	log := slog.With("func", "grpcClient.Update")
+	log := slog.With("func", "GrpcClient.Update")
 
 	_, err := client.send.UpdateV1(
 		ctx,

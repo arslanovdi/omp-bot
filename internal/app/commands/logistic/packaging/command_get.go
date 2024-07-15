@@ -1,4 +1,4 @@
-package _package
+package packaging
 
 import (
 	"errors"
@@ -8,9 +8,10 @@ import (
 	"log/slog"
 )
 
-func (c *packageCommander) Get(message *tgbotapi.Message) {
+// Get обработка команды /get бота
+func (c *Commander) Get(message *tgbotapi.Message) {
 
-	log := slog.With("func", "packageCommander.Get")
+	log := slog.With("func", "Commander.Get")
 
 	args := message.CommandArguments()
 

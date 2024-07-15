@@ -11,9 +11,9 @@ import (
 )
 
 // Delete вызывает gRPC функцию DeleteV1
-func (client *grpcClient) Delete(ctx context.Context, id uint64) error {
+func (client *Client) Delete(ctx context.Context, id uint64) error {
 
-	log := slog.With("func", "grpcClient.Delete")
+	log := slog.With("func", "GrpcClient.Delete")
 
 	_, err := client.send.DeleteV1(
 		ctx,

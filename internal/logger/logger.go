@@ -1,3 +1,4 @@
+// Package logger логирование
 package logger
 
 import (
@@ -5,6 +6,7 @@ import (
 	"os"
 )
 
+// InitializeLogger инициализирует slog логгера
 func InitializeLogger(level slog.Level) {
 	logger := slog.New(slog.NewJSONHandler(
 		os.Stderr,

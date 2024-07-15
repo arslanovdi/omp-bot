@@ -11,9 +11,9 @@ import (
 )
 
 // Get вызывает gRPC функцию GetV1
-func (client *grpcClient) Get(ctx context.Context, id uint64) (*model.Package, error) {
+func (client *Client) Get(ctx context.Context, id uint64) (*model.Package, error) {
 
-	log := slog.With("func", "grpcClient.Get")
+	log := slog.With("func", "GrpcClient.Get")
 
 	response, err := client.send.GetV1(
 		ctx,

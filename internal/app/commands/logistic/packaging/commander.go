@@ -1,4 +1,5 @@
-package _package
+// Package packaging пакет для обработки команд логистики пакетов телеграм бота
+package packaging
 
 import (
 	"github.com/arslanovdi/omp-bot/internal/app/path"
@@ -8,27 +9,30 @@ import (
 )
 
 const limit = 10 // кол-во package выдаваемое за 1 раз
+const list = "list"
 
-type packageCommander struct {
+// Commander структура обработчика команд работы с пакетами телеграм бота
+type Commander struct {
 	bot            *tgbotapi.BotAPI
 	packageService *service.LogisticPackageService
 }
 
-func NewPackageCommander(bot *tgbotapi.BotAPI, service *service.LogisticPackageService) *packageCommander {
+// NewCommander конструктор
+func NewCommander(bot *tgbotapi.BotAPI, service *service.LogisticPackageService) *Commander {
 
-	return &packageCommander{
+	return &Commander{
 		bot:            bot,
 		packageService: service,
 	}
 }
 
 // HandleCallback перебор кнопок и вызов соттветствующего обработчика
-func (c *packageCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+func (c *Commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 
 	log := slog.With("func", "PackageCommander.HandleCallback")
 
 	switch callbackPath.CallbackName {
-	case "list":
+	case list:
 		c.CallbackList(callback, callbackPath)
 	default:
 		log.Info("unknown callback name", slog.String("callback name", callbackPath.CallbackName))
@@ -36,13 +40,13 @@ func (c *packageCommander) HandleCallback(callback *tgbotapi.CallbackQuery, call
 }
 
 // HandleCommand перебор команд и вызов соттветствующего обработчика
-func (c *packageCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
+func (c *Commander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
 	switch commandPath.CommandName {
 	case "help":
 		c.Help(msg)
 	case "get":
 		c.Get(msg)
-	case "list":
+	case list:
 		c.List(msg)
 	case "delete":
 		c.Delete(msg)
@@ -56,7 +60,7 @@ func (c *packageCommander) HandleCommand(msg *tgbotapi.Message, commandPath path
 }
 
 // errorResponseCommand возвращает сообщение об ошибке в бот
-func (c *packageCommander) errorResponseCommand(message *tgbotapi.Message, resp string) {
+func (c *Commander) errorResponseCommand(message *tgbotapi.Message, resp string) {
 
 	log := slog.With("func", "PackageCommander.errorResponseCommand")
 
@@ -72,9 +76,9 @@ func (c *packageCommander) errorResponseCommand(message *tgbotapi.Message, resp 
 }
 
 // errorResponseCallback возвращает сообщение об ошибке в бот
-func (c *packageCommander) errorResponseCallback(callback *tgbotapi.CallbackQuery, resp string) {
+func (c *Commander) errorResponseCallback(callback *tgbotapi.CallbackQuery, resp string) {
 
-	log := slog.With("func", "packageCommander.errorResponseCallback")
+	log := slog.With("func", "Commander.errorResponseCallback")
 
 	msg := tgbotapi.NewMessage(
 		callback.Message.Chat.ID,

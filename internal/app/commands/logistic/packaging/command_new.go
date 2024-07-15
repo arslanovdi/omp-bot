@@ -1,4 +1,4 @@
-package _package
+package packaging
 
 import (
 	"fmt"
@@ -10,9 +10,9 @@ import (
 )
 
 // New обработка команды /new бота
-func (c *packageCommander) New(message *tgbotapi.Message) {
+func (c *Commander) New(message *tgbotapi.Message) {
 
-	log := slog.With("func", "packageCommander.New")
+	log := slog.With("func", "Commander.New")
 
 	args := message.CommandArguments()
 
@@ -25,18 +25,18 @@ func (c *packageCommander) New(message *tgbotapi.Message) {
 		_, err = fmt.Sscanf(args, "%s", &pkg.Title)
 		if err != nil || len(pkg.Title) == 0 {
 			log.Info("wrong args", slog.Any("args", args), slog.String("error", err.Error()))
-			err = fmt.Errorf("wrong args %v\n", args)
+			err = fmt.Errorf("wrong args %v", args)
 		}
 	case 1:
 		pkg.Weight = new(uint64)
 		_, err = fmt.Sscanf(args, "%s %d", &pkg.Title, pkg.Weight)
 		if err != nil || len(pkg.Title) == 0 || *pkg.Weight == 0 {
 			log.Info("wrong args", slog.Any("args", args), slog.String("error", err.Error()))
-			err = fmt.Errorf("wrong args %v\n", args)
+			err = fmt.Errorf("wrong args %v", args)
 		}
 	default:
 		log.Info("wrong args count", slog.Any("args", args))
-		err = fmt.Errorf("wrong args %v\n", args)
+		err = fmt.Errorf("wrong args %v", args)
 	}
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package _package
+package packaging
 
 import (
 	"errors"
@@ -8,9 +8,10 @@ import (
 	"log/slog"
 )
 
-func (c *packageCommander) Delete(message *tgbotapi.Message) {
+// Delete обработка команды /delete бота
+func (c *Commander) Delete(message *tgbotapi.Message) {
 
-	log := slog.With("func", "packageCommander.Delete")
+	log := slog.With("func", "Commander.Delete")
 
 	args := message.CommandArguments()
 
@@ -26,15 +27,14 @@ func (c *packageCommander) Delete(message *tgbotapi.Message) {
 	if err != nil {
 		log.Error("fail to delete package", slog.Uint64("id", id), slog.String("error", err.Error()))
 		if errors.Is(err, model.ErrNotFound) {
-			c.errorResponseCommand(message, fmt.Sprintf("Package not found"))
+			c.errorResponseCommand(message, "Package not found")
 			return
 		}
 		c.errorResponseCommand(message, fmt.Sprintf("Fail to delete package with id %d", id))
 		return
 	}
 
-	var msg tgbotapi.MessageConfig
-	msg = tgbotapi.NewMessage(
+	msg := tgbotapi.NewMessage(
 		message.Chat.ID,
 		fmt.Sprintf("Package with id: %d deleted", id),
 	)

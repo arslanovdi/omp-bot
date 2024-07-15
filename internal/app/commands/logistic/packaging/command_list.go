@@ -1,9 +1,8 @@
-package _package
+package packaging
 
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/arslanovdi/omp-bot/internal/model"
 	"log/slog"
 	"strings"
@@ -12,9 +11,10 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func (c *packageCommander) List(message *tgbotapi.Message) {
+// List обработка команды /list бота
+func (c *Commander) List(message *tgbotapi.Message) {
 
-	log := slog.With("func", "packageCommander.List")
+	log := slog.With("func", "Commander.List")
 
 	outputMsgText := strings.Builder{}
 	outputMsgText.WriteString("These are all our packages: \n\n")
@@ -27,10 +27,10 @@ func (c *packageCommander) List(message *tgbotapi.Message) {
 			c.errorResponseCommand(message, "packages not found")
 			return
 		}
-		if errors.Is(err, model.EndOfList) {
+		if errors.Is(err, model.ErrEndOfList) {
 			endOfList = true
 		} else {
-			c.errorResponseCommand(message, fmt.Sprintf("Ошибка получения списка"))
+			c.errorResponseCommand(message, "Ошибка получения списка")
 			log.Error("fail to get list of packages", slog.String("error", err.Error()))
 			return
 		}

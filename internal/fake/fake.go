@@ -1,17 +1,19 @@
+// Package fake эмуляция работы пользователя телеграм бота
 package fake
 
 import (
+	"crypto/rand"
 	"github.com/arslanovdi/omp-bot/internal/model"
 	"github.com/arslanovdi/omp-bot/internal/service"
 	"github.com/brianvoe/gofakeit/v7"
 	"log/slog"
-	"math/rand"
+	"math/big"
 	"time"
 )
 
 const (
 	create = 30
-	delete = 10
+	del    = 10
 	get    = 20
 	list   = 20
 	update = 20
@@ -19,12 +21,22 @@ const (
 
 var counter uint64
 
-// Emulate эмуляция работы пользователей телеграм бота
-func Emulate(d time.Duration, pkgService *service.LogisticPackageService) {
-	for {
-		time.Sleep(d)
+// genInt генерация случайного числа от 0 до max при помощи пакета crypto/rand
+func genInt(max uint64) uint64 {
+	rnd, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	if err != nil {
+		slog.Error("FAKE fail to generate random number", slog.String("error", err.Error()))
+		return 0
+	}
+	return rnd.Uint64()
+}
 
-		rnd := rand.Intn(100) // 100%
+// Emulate эмуляция работы пользователя телеграм бота
+func Emulate(d uint64, pkgService *service.LogisticPackageService) {
+	for {
+		time.Sleep(time.Duration(genInt(d)) * time.Millisecond) // от 200ms до 1200 мс на одну операцию)
+
+		rnd := genInt(100) // 100%
 		switch {
 		case rnd < create: // create % созданий пакета
 			pkg := model.Package{}
@@ -42,42 +54,42 @@ func Emulate(d time.Duration, pkgService *service.LogisticPackageService) {
 				slog.Error("FAKE fail to create package", "error", err)
 			}
 			counter++
-		case rnd < create+delete: // delete % удаления пакета
+		case rnd < create+del: // del % удаления пакета
 
 			if counter <= 2 {
 				continue
 			}
 
-			id := uint64(rand.Int63n(int64(counter))) + 1
+			id := genInt(counter) + 1
 
 			err := pkgService.Delete(id)
 			if err != nil {
 				slog.Error("FAKE fail to delete package", "error", err)
 			}
 			counter--
-		case rnd < create+delete+get: // get% получения пакета
+		case rnd < create+del+get: // get% получения пакета
 
 			if counter <= 2 {
 				continue
 			}
-			id := uint64(rand.Int63n(int64(counter))) + 1
+			id := genInt(counter) + 1
 
 			_, err := pkgService.Get(id)
 			if err != nil {
 				slog.Error("FAKE fail to get package", "id", id)
 			}
-		case rnd < create+delete+get+list: // list % получения списка пакетов
+		case rnd < create+del+get+list: // list % получения списка пакетов
 			if counter < 10 {
 				continue
 			}
-			offset := rand.Int63n(int64(counter/2) + 1)
-			limit := rand.Int63n(int64(counter) - offset)
-			_, err := pkgService.List(uint64(offset), uint64(limit))
+			offset := genInt(counter/2) + 1
+			limit := genInt(counter - offset)
+			_, err := pkgService.List(offset, limit)
 			if err != nil {
 				slog.Error("FAKE fail to list package", "error", err)
 			}
 
-		case rnd < create+delete+get+list+update: // update % обновления пакета
+		case rnd < create+del+get+list+update: // update % обновления пакета
 
 			if counter <= 2 {
 				continue
@@ -85,7 +97,7 @@ func Emulate(d time.Duration, pkgService *service.LogisticPackageService) {
 
 			pkg := model.Package{}
 
-			pkg.ID = uint64(rand.Int63n(int64(counter)) + 1)
+			pkg.ID = genInt(counter) + 1
 
 			if gofakeit.Bool() {
 				pkg.Weight = new(uint64)

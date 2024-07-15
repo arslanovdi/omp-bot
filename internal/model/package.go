@@ -1,3 +1,4 @@
+// Package model работа с моделью данных
 package model
 
 import (
@@ -9,6 +10,7 @@ import (
 	"time"
 )
 
+// Package - модель данных - пакет
 type Package struct {
 	ID      uint64
 	Title   string
@@ -17,6 +19,7 @@ type Package struct {
 	Updated *time.Time
 }
 
+// String - строковое представление данных о пакет
 func (c *Package) String() string {
 	str := strings.Builder{}
 
@@ -32,8 +35,7 @@ func (c *Package) String() string {
 	return str.String()
 }
 
-// LogValue implements slog.LogValuer interface
-// вывод Package в лог
+// LogValue implements slog.LogValuer interface. Структурированный вывод данных Package в лог
 func (c *Package) LogValue() slog.Value {
 	return slog.GroupValue(
 		slog.Uint64("ID", c.ID),
@@ -44,6 +46,7 @@ func (c *Package) LogValue() slog.Value {
 	)
 }
 
+// ToProto - конвертация данных о пакете в протобуф (DTO)
 func (c *Package) ToProto() *pb.Package {
 
 	var update *timestamp.Timestamp
@@ -66,6 +69,7 @@ func (c *Package) ToProto() *pb.Package {
 	}
 }
 
+// FromProto - конвертация протобуф (DTO) в данные о пакете
 func (c *Package) FromProto(pkg *pb.Package) {
 	c.ID = pkg.Id
 	c.Title = pkg.Title
@@ -75,5 +79,4 @@ func (c *Package) FromProto(pkg *pb.Package) {
 		c.Updated = &time.Time{}
 		*c.Updated = time.Unix(pkg.Updated.Seconds, int64(pkg.Updated.Nanos))
 	}
-
 }

@@ -1,9 +1,8 @@
-package _package
+package packaging
 
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/arslanovdi/omp-bot/internal/model"
 	"log/slog"
 	"strings"
@@ -12,19 +11,20 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// CallbackListData структура данных для обработки реакции на нажатие кнопки
 type CallbackListData struct {
-	Offset int `json:"offset"`
+	Offset int `json:"offset"` // смещение, с которого выводятся записи в телеграм боте
 }
 
 // CallbackList обработка реакции на нажатие кнопки
-func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+func (c *Commander) CallbackList(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 
-	log := slog.With("func", "packageCommander.CallbackList")
+	log := slog.With("func", "Commander.CallbackList")
 
 	parsedData := CallbackListData{}
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &parsedData)
 	if err != nil {
-		c.errorResponseCallback(callback, fmt.Sprintf("внутренняя ошибка"))
+		c.errorResponseCallback(callback, "внутренняя ошибка")
 		log.Error("fail to read json data for type CallbackListData from input string",
 			slog.String("input string", callbackPath.CallbackData),
 			slog.String("error", err.Error()))
@@ -42,10 +42,10 @@ func (c *packageCommander) CallbackList(callback *tgbotapi.CallbackQuery, callba
 			c.errorResponseCallback(callback, "packages not found")
 			return
 		}
-		if errors.Is(err, model.EndOfList) {
+		if errors.Is(err, model.ErrEndOfList) {
 			endOfList = true
 		} else {
-			c.errorResponseCallback(callback, fmt.Sprintf("Ошибка получения списка"))
+			c.errorResponseCallback(callback, "Ошибка получения списка")
 			log.Error("fail to get list of packages", slog.String("error", err.Error()))
 			return
 		}

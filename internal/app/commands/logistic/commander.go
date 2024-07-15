@@ -1,7 +1,8 @@
+// Package logistic пакет для обработки команд логистики телеграм бота
 package logistic
 
 import (
-	"github.com/arslanovdi/omp-bot/internal/app/commands/logistic/package"
+	"github.com/arslanovdi/omp-bot/internal/app/commands/logistic/packaging"
 	"github.com/arslanovdi/omp-bot/internal/service"
 	"log/slog"
 
@@ -9,42 +10,48 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+const mysubdomain = "package"
+
+// PackageCommander интерфейс обрабатывающий команды логистики телеграм бота
 type PackageCommander interface {
 	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath)
 	HandleCommand(message *tgbotapi.Message, commandPath path.CommandPath)
 }
 
-type logisticCommander struct {
+// Commander структура обработчика команд логистики телеграм бота
+type Commander struct {
 	bot              *tgbotapi.BotAPI
 	packageCommander PackageCommander
 }
 
 // NewLogisticCommander конструктор
-func NewLogisticCommander(bot *tgbotapi.BotAPI, pkgService *service.LogisticPackageService) *logisticCommander {
-	return &logisticCommander{
+func NewLogisticCommander(bot *tgbotapi.BotAPI, pkgService *service.LogisticPackageService) *Commander {
+	return &Commander{
 		bot:              bot,
-		packageCommander: _package.NewPackageCommander(bot, pkgService),
+		packageCommander: packaging.NewCommander(bot, pkgService),
 	}
 }
 
-func (c *logisticCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
+// HandleCallback обработка нажатия кнопок в телеграм боте
+func (c *Commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 
-	log := slog.With("func", "logisticCommander.HandleCallback")
+	log := slog.With("func", "LogisticCommander.HandleCallback")
 
 	switch callbackPath.Subdomain {
-	case "package":
+	case mysubdomain:
 		c.packageCommander.HandleCallback(callback, callbackPath)
 	default:
 		log.Info("unknown subdomain", slog.String("subdomain", callbackPath.Subdomain))
 	}
 }
 
-func (c *logisticCommander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
+// HandleCommand обработка команд в телеграм боте
+func (c *Commander) HandleCommand(msg *tgbotapi.Message, commandPath path.CommandPath) {
 
-	log := slog.With("func", "logisticCommander.HandleCommand")
+	log := slog.With("func", "LogisticCommander.HandleCommand")
 
 	switch commandPath.Subdomain {
-	case "package":
+	case mysubdomain:
 		c.packageCommander.HandleCommand(msg, commandPath)
 	default:
 		log.Info("unknown subdomain", slog.String("subdomain", commandPath.Subdomain))

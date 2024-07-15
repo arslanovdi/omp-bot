@@ -1,4 +1,4 @@
-package _package
+package packaging
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-func (c *packageCommander) Help(message *tgbotapi.Message) {
+// Help обработка команды /help бота
+func (c *Commander) Help(message *tgbotapi.Message) {
 
-	log := slog.With("func", "packageCommander.Help")
+	log := slog.With("func", "Commander.Help")
 
 	str := strings.Builder{}
 	str.WriteString("/help__logistic__package - help\n")

@@ -15,6 +15,7 @@ type CommandPath struct {
 	Subdomain   string
 }
 
+// ErrUnknownCommand некорректная команда
 var ErrUnknownCommand = errors.New("unknown command")
 
 // ParseCommand парсинг строки вида: "CommandName__Domain__Subdomain" в структуру CommandPath
